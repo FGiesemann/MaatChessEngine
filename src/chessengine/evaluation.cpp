@@ -8,7 +8,7 @@
 namespace chessengine {
 
 auto Evaluator::evaluate(const chesscore::Position &position, chesscore::Color color) const -> int {
-    return countup_material(position, color);
+    return countup_material(position, color) - countup_material(position, chesscore::other_color(color));
 }
 
 auto Evaluator::countup_material(const chesscore::Position &position, chesscore::Color color) const -> int {
