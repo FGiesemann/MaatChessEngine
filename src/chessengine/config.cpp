@@ -3,7 +3,7 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
-#include "config.h"
+#include "chessengine/config.h"
 
 namespace chessengine {
 

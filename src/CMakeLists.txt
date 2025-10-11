@@ -3,6 +3,10 @@ add_library(ChessEngineLib
 )
 add_compiler_warnings(ChessEngineLib)
 target_compile_features(ChessEngineLib PUBLIC cxx_std_23)
+target_include_directories(ChessEngineLib PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
 find_package(chessgame REQUIRED)
 target_link_libraries(ChessEngineLib PUBLIC ChessGame::ChessGame)
 
