@@ -9,6 +9,7 @@ namespace chessengine {
 
 auto MinimaxSearch::best_move(const chesscore::Position &position) const -> chesscore::Move {
     m_position = position;
+    m_color_to_evaluate = m_position.side_to_move();
 
     chesscore::Move best_move{};
     int best_value = Evaluator::NegInfinity;
@@ -27,11 +28,11 @@ auto MinimaxSearch::best_move(const chesscore::Position &position) const -> ches
 
 auto MinimaxSearch::minimax(int depth, int alpha, int beta, bool maximizing_player) const -> int {
     if (depth == 0) {
-        return m_evaluator.evaluate(m_position);
+        return m_evaluator.evaluate(m_position, m_color_to_evaluate);
     }
     const auto all_legal_moves = m_position.all_legal_moves();
     if (all_legal_moves.empty()) {
-        return m_evaluator.evaluate(m_position);
+        return m_evaluator.evaluate(m_position, m_color_to_evaluate);
     }
 
     if (maximizing_player) {
