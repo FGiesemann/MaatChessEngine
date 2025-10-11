@@ -27,13 +27,14 @@ public:
     auto piece_value(chesscore::PieceType piece_type) const -> int { return m_piece_values[get_index(piece_type)]; }
     auto empty_board_value() const -> int { return 0; }
 private:
+    int m_piece_values[6]{100, 300, 300, 500, 900, 0}; // same order as chesscore piece types
+
     static_assert(get_index(chesscore::PieceType::Pawn) == 0);
     static_assert(get_index(chesscore::PieceType::Rook) == 1);
     static_assert(get_index(chesscore::PieceType::Knight) == 2);
     static_assert(get_index(chesscore::PieceType::Bishop) == 3);
     static_assert(get_index(chesscore::PieceType::Queen) == 4);
     static_assert(get_index(chesscore::PieceType::King) == 5);
-    int m_piece_values[6]{100, 300, 300, 500, 900, 0}; // same order as chesscore piece types
 };
 
 class Evaluator {
@@ -43,10 +44,10 @@ public:
 
     static constexpr int Infinity = std::numeric_limits<int>::max();
     static constexpr int NegInfinity = std::numeric_limits<int>::min();
-private:
-    EvaluatorConfig m_config;
 
     auto countup_material(const chesscore::Position &position, chesscore::Color color) const -> int;
+private:
+    EvaluatorConfig m_config;
 };
 
 } // namespace chessengine
