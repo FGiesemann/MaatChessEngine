@@ -19,6 +19,9 @@ class Evaluator {
 public:
     explicit Evaluator(EvaluatorConfig config) : m_config{std::move(config)} {}
     auto evaluate(const chesscore::Position &position) const -> int;
+
+    static constexpr int Infinity = std::numeric_limits<int>::max();
+    static constexpr int NegInfinity = std::numeric_limits<int>::min();
 private:
     EvaluatorConfig m_config;
 };
