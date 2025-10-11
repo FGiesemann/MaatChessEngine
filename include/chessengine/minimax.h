@@ -15,6 +15,7 @@ namespace chessengine {
 
 struct MinimaxConfig {
     int max_depth{4};
+    bool use_alpha_beta_pruning{true};
 };
 
 /**
