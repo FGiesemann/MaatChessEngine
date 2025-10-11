@@ -1,0 +1,64 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
+
+
+class ChessEngineConan(ConanFile):
+    name = "chessengine"
+    version = "1.0.0"
+    package_type = "library"
+
+    license = "MIT License"
+    author = "Florian Giesemann <florian.giesemann@gmail.com>"
+    url = "https://github.com/FGiesemann/ChessEngine.git"
+    homepage = "https://github.com/FGiesemann/ChessEngine"
+
+    settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+
+    exports_sources = (
+        "CMakeLists.txt",
+        "cmake/*",
+        "src/*",
+        "include/*",
+        "test/*",
+        "LICENSE",
+    )
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.15]")
+
+    def requirements(self):
+        self.requires("chesscore/1.0.0")
+        self.requires("chessgame/1.0.0")
+        self.test_requires("catch2/3.7.1")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self)
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
+
+    def package_info(self):
+        self.cpp_info.libs = ["ChessEngine"]
+        self.cpp_info.set_property("cmake_target_name", "ChessEngine::ChessEngine")
