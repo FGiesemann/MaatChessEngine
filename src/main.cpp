@@ -1,9 +1,11 @@
+/* ************************************************************************** *
+ * Chess Engine                                                               *
+ * Chess playing engine                                                       *
+ * ************************************************************************** */
+
 #include <iostream>
 
-#include <chesscore/square.h>
-
-int main() {
+auto main() -> int {
     std::cout << "Hello, World!\n";
-    std::cout << "Square: " << to_string(chesscore::Square::A1) << '\n';
     return 0;
 }
