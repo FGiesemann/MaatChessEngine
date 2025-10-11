@@ -11,10 +11,10 @@ auto MinimaxSearch::best_move(const chesscore::Position &position) const -> ches
     m_position = position;
 
     chesscore::Move best_move{};
-    int best_value = std::numeric_limits<int>::min();
+    int best_value = Evaluator::NegInfinity;
     for (const auto &move : m_position.all_legal_moves()) {
         m_position.make_move(move);
-        const auto value = minimax(m_config.max_depth, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
+        const auto value = minimax(m_config.max_depth, Evaluator::NegInfinity, Evaluator::Infinity, false);
         m_position.unmake_move(move);
         if (value > best_value) {
             best_move = move;
@@ -35,7 +35,7 @@ auto MinimaxSearch::minimax(int depth, int alpha, int beta, bool maximizing_play
     }
 
     if (maximizing_player) {
-        int best_value = std::numeric_limits<int>::min();
+        int best_value = Evaluator::NegInfinity;
         for (const auto &move : all_legal_moves) {
             m_position.make_move(move);
             best_value = std::max(best_value, minimax(depth - 1, alpha, beta, false));
@@ -47,7 +47,7 @@ auto MinimaxSearch::minimax(int depth, int alpha, int beta, bool maximizing_play
         }
         return best_value;
     } else {
-        int best_value = std::numeric_limits<int>::max();
+        int best_value = Evaluator::Infinity;
         for (const auto &move : all_legal_moves) {
             m_position.make_move(move);
             best_value = std::min(best_value, minimax(depth - 1, alpha, beta, true));
