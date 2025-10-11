@@ -41,7 +41,7 @@ auto MinimaxSearch::minimax(int depth, int alpha, int beta, bool maximizing_play
             best_value = std::max(best_value, minimax(depth - 1, alpha, beta, false));
             m_position.unmake_move(move);
             alpha = std::max(alpha, best_value);
-            if (beta <= alpha) {
+            if (m_config.use_alpha_beta_pruning && (beta <= alpha)) {
                 break;
             }
         }
@@ -53,7 +53,7 @@ auto MinimaxSearch::minimax(int depth, int alpha, int beta, bool maximizing_play
             best_value = std::min(best_value, minimax(depth - 1, alpha, beta, true));
             m_position.unmake_move(move);
             beta = std::min(beta, best_value);
-            if (beta <= alpha) {
+            if (m_config.use_alpha_beta_pruning && (beta <= alpha)) {
                 break;
             }
         }
