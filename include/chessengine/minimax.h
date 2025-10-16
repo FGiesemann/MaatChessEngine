@@ -26,7 +26,7 @@ struct MinimaxConfig {
  */
 class MinimaxSearch {
 public:
-    MinimaxSearch(MinimaxConfig config, const Evaluator &evaluator) : m_config{std::move(config)}, m_evaluator{evaluator} {};
+    MinimaxSearch(MinimaxConfig config, const Evaluator &evaluator) : m_config{std::move(config)}, m_evaluator{evaluator} {}
     auto best_move(const chesscore::Position &position) const -> chesscore::Move;
 private:
     MinimaxConfig m_config;

@@ -7,6 +7,10 @@
 
 namespace chessengine {
 
+const Score Score::Infinity{32700};
+const Score Score::NegInfinity{-Infinity};
+const Score Score::Mate{32000};
+
 auto Evaluator::evaluate(const chesscore::Position &position, chesscore::Color color) const -> Score {
     return countup_material(position, color) - countup_material(position, chesscore::other_color(color));
 }
