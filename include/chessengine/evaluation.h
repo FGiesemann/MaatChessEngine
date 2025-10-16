@@ -25,9 +25,9 @@ struct [[nodiscard]] Score {
      * \brief Construct a new Score object.
      *
      * Create a new Score with the given value.
-     * \param value The value.
+     * \param score_value The value.
      */
-    constexpr explicit Score(value_type value = {}) : value{value} {}
+    constexpr explicit Score(value_type score_value = {}) : value{score_value} {}
 
     /**
      * \brief Comparison operator.
@@ -69,6 +69,10 @@ struct [[nodiscard]] Score {
         value = static_cast<value_type>(value * factor);
         return *this;
     }
+
+    static const Score Infinity;
+    static const Score NegInfinity;
+    static const Score Mate;
 };
 
 /**
@@ -146,10 +150,6 @@ private:
 
 class Evaluator {
 public:
-    static constexpr Score Infinity{32700};
-    static constexpr Score NegInfinity{-Infinity};
-    static constexpr Score Mate{32000};
-
     explicit Evaluator(EvaluatorConfig config) : m_config{std::move(config)} {}
     auto evaluate(const chesscore::Position &position, chesscore::Color color) const -> Score;
 
