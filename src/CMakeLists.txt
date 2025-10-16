@@ -3,6 +3,7 @@ add_library(ChessEngineLib
     chessengine/evaluation.cpp
     chessengine/minimax.cpp
     chessengine/search.cpp
+    chessengine/types.cpp
 )
 add_compiler_warnings(ChessEngineLib)
 target_compile_features(ChessEngineLib PUBLIC cxx_std_23)
