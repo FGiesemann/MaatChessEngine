@@ -34,7 +34,7 @@ private:
     mutable chesscore::Position m_position;
     mutable chesscore::Color m_color_to_evaluate;
 
-    auto minimax(int depth, int alpha, int beta, bool maximizing_player) const -> int;
+    auto minimax(int depth, Score alpha, Score beta, bool maximizing_player) const -> Score;
 };
 
 } // namespace chessengine
