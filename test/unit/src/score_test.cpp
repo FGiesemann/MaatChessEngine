@@ -3,16 +3,12 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
+#include <catch2/catch_all.hpp>
+
 #include "chessengine/types.h"
+using namespace chessengine;
 
-namespace chessengine {
-
-const Score Score::Infinity{32700};
-const Score Score::NegInfinity{-Infinity};
-const Score Score::Mate{32000};
-
-const Depth Depth::Zero{0};
-const Depth Depth::Step{1};
-const Depth Depth::MaxMateDepth{256};
-
-} // namespace chessengine
+TEST_CASE("Score.Mate in X", "[score]") {
+    CHECK(ply_to_mate(Score::Mate - Depth{3}) == Depth{3});
+    CHECK(ply_to_mate(-(Score::Mate - Depth{5})) == Depth{5});
+}

@@ -40,6 +40,8 @@ struct [[nodiscard]] Score : public StrongType<std::int16_t, struct ScoreTag> {
         return *this;
     }
 
+    constexpr auto negative() const -> bool { return value < 0; }
+
     static const Score Infinity;
     static const Score NegInfinity;
     static const Score Mate;
@@ -79,6 +81,8 @@ struct [[nodiscard]] Depth : public StrongType<std::int16_t, struct DepthTag> {
         return old;
     }
 
+    static const Depth Zero;
+    static const Depth Step;
     static const Depth MaxMateDepth;
 };
 
@@ -131,6 +135,35 @@ struct [[nodiscard]] Depth : public StrongType<std::int16_t, struct DepthTag> {
 [[nodiscard]] constexpr auto operator-(Score lhs, Depth rhs) -> Score {
     auto value = static_cast<Score::value_type>(lhs.value - rhs.value);
     return Score{value};
+}
+
+[[nodiscard]] constexpr auto operator-(Depth lhs, Depth rhs) -> Depth {
+    Depth result{lhs};
+    return result -= rhs;
+}
+
+[[nodiscard]] constexpr auto operator+(Depth lhs, Depth rhs) -> Depth {
+    Depth result{lhs};
+    return result += rhs;
+}
+
+constexpr auto is_winning_score(Score score) -> bool {
+    return score >= (Score::Mate - Depth::MaxMateDepth);
+}
+
+constexpr auto is_losing_score(Score score) -> bool {
+    return score <= -(Score::Mate - Depth::MaxMateDepth);
+}
+
+constexpr auto is_decisive_scode(Score score) -> bool {
+    return is_winning_score(score) || is_losing_score(score);
+}
+
+constexpr auto ply_to_mate(Score score) -> Depth {
+    if (score.negative()) {
+        return Depth{(Score::Mate + score).value};
+    }
+    return Depth{(Score::Mate - score).value};
 }
 
 } // namespace chessengine
