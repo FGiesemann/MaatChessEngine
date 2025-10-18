@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <chesscore/position.h>
+#include <chessuci/move.h>
 
 using namespace std::literals;
 
@@ -24,6 +25,11 @@ struct MateInXPuzzle {
     [[nodiscard]] auto mate_plys() const -> size_t { return moves.size(); }
 };
 
+class Error : public std::runtime_error {
+public:
+    explicit Error(const std::string &message) : std::runtime_error{message} {}
+};
+
 auto split_fields(std::string_view line, std::string_view separator = ",") -> std::vector<std::string>;
 auto is_mate_puzzle(std::string_view theme) -> bool;
 auto extract_puzzle(const std::vector<std::string> &fields, std::vector<MateInXPuzzle> &puzzles) -> void;
@@ -35,7 +41,6 @@ auto main(int argc, const char *argv[]) -> int {
     }
 
     std::string input_filename{argv[1]};
-    std::cout << "Opening " << input_filename << "\n";
     std::ifstream input_file{input_filename};
     if (!input_file.is_open()) {
         std::cerr << "Unable to open " << input_filename << "\n";
@@ -50,26 +55,59 @@ auto main(int argc, const char *argv[]) -> int {
 
     std::vector<MateInXPuzzle> puzzles{};
     std::size_t line_count{0};
+    std::cout << "Found 0 puzzles";
     while (std::getline(input_file, line)) {
         ++line_count;
         const auto fields = split_fields(line);
         if (fields.size() >= 8) {
             if (is_mate_puzzle(fields[ThemeFieldIndex])) {
-                extract_puzzle(fields, puzzles);
+                try {
+                    extract_puzzle(fields, puzzles);
+                } catch (const Error &e) {
+                    std::cerr << "Error in line " << line_count << ": " << e.what() << "\n";
+                }
             }
         }
+
+        if ((line_count + 1) % 100 == 0) {
+            std::cout << "\rFound " << puzzles.size() << " puzzles";
+        }
     }
-    std::cout << "Processed " << line_count << " lines\n";
+    std::cout << "\rFound " << puzzles.size() << " puzzles\n";
+
+    // TODO:
+    // - sort by x (as in mate-in-x)
+    // - write to EPD output file
+
     return 0;
 }
 
-auto extract_puzzle(const std::vector<std::string> &fields, std::vector<MateInXPuzzle> &puzzles) -> void {
-    auto position = chesscore::Position{chesscore::FenString{fields[1]}};
-    const auto solution = split_fields(fields[2], " ");
+auto convert_move(const std::string &uci_str, const chesscore::Position &position) -> chesscore::Move {
+    const auto exp_move = chessuci::parse_uci_move(uci_str);
+    if (!exp_move.has_value()) {
+        throw Error{std::string{"Failed to parse move "} + uci_str};
+    }
 
-    // first move in solution has to be applied to position in order to get the starting position of the puzzle
-    // the remaining moves in solution are collected in the MoveList
+    const auto moves = chessuci::match_move(exp_move.value(), position.all_legal_moves());
+    if (moves.size() != 1) {
+        throw Error{std::string{"Failed to find move "} + uci_str};
+    }
+    return moves.front();
+}
+
+auto extract_puzzle(const std::vector<std::string> &fields, std::vector<MateInXPuzzle> &puzzles) -> void {
+    const auto solution = split_fields(fields[2], " ");
+    auto position = chesscore::Position{chesscore::FenString{fields[1]}};
+    const auto setup_move = convert_move(solution.front(), position);
+    position.make_move(setup_move);
+
     chesscore::MoveList moves{};
+    auto test_position{position};
+    for (size_t index = 1; index < solution.size(); ++index) {
+        const auto move = convert_move(solution[index], test_position);
+        moves.push_back(move);
+        test_position.make_move(move);
+    }
 
     puzzles.emplace_back(fields[0], position, moves);
 }
