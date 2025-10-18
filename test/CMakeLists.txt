@@ -1,3 +1,3 @@
 add_subdirectory(unit)
 
-add_subdirectory(check_in_x_test)
+add_subdirectory(mate_in_x_test)

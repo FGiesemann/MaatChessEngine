@@ -30,6 +30,7 @@ class ChessEngineConan(ConanFile):
 
     def requirements(self):
         self.requires("chessgame/1.0.0")
+        self.requires("chessuci/0.2.0")
         self.test_requires("catch2/3.7.1")
 
     def config_options(self):
