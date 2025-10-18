@@ -26,8 +26,8 @@ auto MinimaxSearch::best_move(const chesscore::Position &position) const -> ches
     return best_move;
 }
 
-auto MinimaxSearch::minimax(int depth, Score alpha, Score beta, bool maximizing_player) const -> Score {
-    if (depth == 0) {
+auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizing_player) const -> Score {
+    if (depth == Depth::Zero) {
         return m_evaluator.evaluate(m_position, m_color_to_evaluate);
     }
     const auto all_legal_moves = m_position.all_legal_moves();
@@ -39,7 +39,7 @@ auto MinimaxSearch::minimax(int depth, Score alpha, Score beta, bool maximizing_
         auto best_value = Score::NegInfinity;
         for (const auto &move : all_legal_moves) {
             m_position.make_move(move);
-            best_value = std::max(best_value, minimax(depth - 1, alpha, beta, false));
+            best_value = std::max(best_value, minimax(--depth, alpha, beta, false));
             m_position.unmake_move(move);
             alpha = std::max(alpha, best_value);
             if (m_config.use_alpha_beta_pruning && (beta <= alpha)) {
@@ -51,7 +51,7 @@ auto MinimaxSearch::minimax(int depth, Score alpha, Score beta, bool maximizing_
         auto best_value = Score::Infinity;
         for (const auto &move : all_legal_moves) {
             m_position.make_move(move);
-            best_value = std::min(best_value, minimax(depth - 1, alpha, beta, true));
+            best_value = std::min(best_value, minimax(--depth, alpha, beta, true));
             m_position.unmake_move(move);
             beta = std::min(beta, best_value);
             if (m_config.use_alpha_beta_pruning && (beta <= alpha)) {
