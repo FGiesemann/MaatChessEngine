@@ -14,7 +14,7 @@
 namespace chessengine {
 
 struct MinimaxConfig {
-    int max_depth{4};
+    Depth max_depth{4};
     bool use_alpha_beta_pruning{true};
 };
 
@@ -34,7 +34,7 @@ private:
     mutable chesscore::Position m_position;
     mutable chesscore::Color m_color_to_evaluate;
 
-    auto minimax(int depth, Score alpha, Score beta, bool maximizing_player) const -> Score;
+    auto minimax(Depth depth, Score alpha, Score beta, bool maximizing_player) const -> Score;
 };
 
 } // namespace chessengine
