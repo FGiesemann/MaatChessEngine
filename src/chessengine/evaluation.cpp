@@ -8,7 +8,14 @@
 namespace chessengine {
 
 auto Evaluator::evaluate(const chesscore::Position &position, chesscore::Color color) const -> Score {
+    if (is_mate(position)) {
+        return color == position.side_to_move() ? -Score::Mate : Score::Mate;
+    }
     return countup_material(position, color) - countup_material(position, chesscore::other_color(color));
+}
+
+auto Evaluator::is_mate(const chesscore::Position &position) -> bool {
+    return position.check_state() == chesscore::CheckState::Checkmate;
 }
 
 auto Evaluator::countup_material(const chesscore::Position &position, chesscore::Color color) const -> Score {

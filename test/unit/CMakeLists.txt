@@ -1,4 +1,5 @@
 add_executable(chessengine_tests
+  src/evaluation_test.cpp
   src/score_test.cpp
 )
 add_compiler_warnings(chessengine_tests)
