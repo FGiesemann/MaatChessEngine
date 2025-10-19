@@ -7,7 +7,7 @@
 
 namespace chessengine {
 
-auto MinimaxSearch::best_move(const chesscore::Position &position) const -> chesscore::Move {
+auto MinimaxSearch::best_move(const chesscore::Position &position) const -> EvaluatedMove {
     m_position = position;
     m_color_to_evaluate = m_position.side_to_move();
 
@@ -23,7 +23,7 @@ auto MinimaxSearch::best_move(const chesscore::Position &position) const -> ches
         }
     }
 
-    return best_move;
+    return {best_move, best_value};
 }
 
 auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizing_player) const -> Score {

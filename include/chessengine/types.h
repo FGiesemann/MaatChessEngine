@@ -9,6 +9,8 @@
 #include <compare>
 #include <cstdint>
 
+#include <chesscore/move.h>
+
 namespace chessengine {
 
 template<typename T, typename Tag>
@@ -84,6 +86,11 @@ struct [[nodiscard]] Depth : public StrongType<std::int16_t, struct DepthTag> {
     static const Depth Zero;
     static const Depth Step;
     static const Depth MaxMateDepth;
+};
+
+struct EvaluatedMove {
+    chesscore::Move move;
+    Score score;
 };
 
 /**

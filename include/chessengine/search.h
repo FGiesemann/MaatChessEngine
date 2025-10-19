@@ -9,9 +9,11 @@
 #include <chesscore/move.h>
 #include <chesscore/position.h>
 
+#include "chessengine/evaluation.h"
+
 namespace chessengine {
 
-auto find_best_move(const chesscore::Position &position) -> chesscore::Move;
+auto find_best_move(const chesscore::Position &position) -> EvaluatedMove;
 
 } // namespace chessengine
 

@@ -9,7 +9,7 @@
 
 namespace chessengine {
 
-auto find_best_move(const chesscore::Position &position) -> chesscore::Move {
+auto find_best_move(const chesscore::Position &position) -> EvaluatedMove {
     MinimaxSearch search{MinimaxConfig{}, Evaluator{EvaluatorConfig{}}};
     return search.best_move(position);
 }
