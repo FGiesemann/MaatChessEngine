@@ -9,6 +9,10 @@ option(BUILD_TESTING "Build unittests" ON)
 
 include(cmake/compiler_warnings.cmake)
 
+find_package(chesscore CONFIG REQUIRED COMPONENTS chesscore)
+find_package(chessgame CONFIG REQUIRED)
+find_package(chessuci CONFIG REQUIRED)
+
 add_subdirectory(src)
 
 if(BUILD_DOCUMENTATION)

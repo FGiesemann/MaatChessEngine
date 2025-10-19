@@ -3,12 +3,15 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
+#include <chesscore/epd.h>
 #include <chesscore/position.h>
+#include <chessgame/san.h>
 #include <chessuci/move.h>
 
 using namespace std::literals;
@@ -30,9 +33,15 @@ public:
     explicit Error(const std::string &message) : std::runtime_error{message} {}
 };
 
-auto split_fields(std::string_view line, std::string_view separator = ",") -> std::vector<std::string>;
+auto check_header_fields(std::istream &input) -> void;
+auto read_puzzles(std::istream &input) -> std::vector<MateInXPuzzle>;
 auto is_mate_puzzle(std::string_view theme) -> bool;
 auto extract_puzzle(const std::vector<std::string> &fields, std::vector<MateInXPuzzle> &puzzles) -> void;
+auto write_puzzles(std::ostream &output, const std::vector<MateInXPuzzle> &puzzles) -> void;
+auto uci_move_to_move(const std::string &uci_str, const chesscore::Position &position) -> chesscore::Move;
+auto split_fields(std::string_view line, std::string_view separator = ",") -> std::vector<std::string>;
+auto convert_to_san_move(const chesscore::Move &move, const chesscore::Position &position) -> std::string;
+auto convert_to_san_moves(const chesscore::MoveList &moves, chesscore::Position position, chesscore::EpdRecord::move_list &list) -> void;
 
 auto main(int argc, const char *argv[]) -> int {
     if (argc < 2) {
@@ -47,16 +56,32 @@ auto main(int argc, const char *argv[]) -> int {
         return 1;
     }
 
-    std::string line{};
-    std::getline(input_file, line);
-    if (line != ExpectedCSVHeader) {
-        std::cout << "WARNING! File does not start with expected header\n";
-    }
+    check_header_fields(input_file);
+    std::vector<MateInXPuzzle> puzzles = read_puzzles(input_file);
+    std::cout << "Sorting...\n";
+    std::ranges::sort(puzzles, [](const MateInXPuzzle &a, const MateInXPuzzle &b) { return a.mate_plys() < b.mate_plys(); });
+    std::cout << "Writing EPD file...\n";
+    std::ofstream epd_file{"mate_in_x.epd"};
+    write_puzzles(epd_file, puzzles);
+    std::cout << "Done.\n";
 
+    return 0;
+}
+
+auto check_header_fields(std::istream &input) -> void {
+    std::string line{};
+    std::getline(input, line);
+    if (line != ExpectedCSVHeader) {
+        throw Error{"File does not start with expected header"};
+    }
+}
+
+auto read_puzzles(std::istream &input) -> std::vector<MateInXPuzzle> {
     std::vector<MateInXPuzzle> puzzles{};
+    std::string line{};
     std::size_t line_count{0};
     std::cout << "Found 0 puzzles";
-    while (std::getline(input_file, line)) {
+    while (std::getline(input, line)) {
         ++line_count;
         const auto fields = split_fields(line);
         if (fields.size() >= 8) {
@@ -74,15 +99,42 @@ auto main(int argc, const char *argv[]) -> int {
         }
     }
     std::cout << "\rFound " << puzzles.size() << " puzzles\n";
-
-    // TODO:
-    // - sort by x (as in mate-in-x)
-    // - write to EPD output file
-
-    return 0;
+    return puzzles;
 }
 
-auto convert_move(const std::string &uci_str, const chesscore::Position &position) -> chesscore::Move {
+auto is_mate_puzzle(std::string_view theme) -> bool {
+    return theme.contains("mate");
+}
+
+auto extract_puzzle(const std::vector<std::string> &fields, std::vector<MateInXPuzzle> &puzzles) -> void {
+    const auto solution = split_fields(fields[2], " ");
+    auto position = chesscore::Position{chesscore::FenString{fields[1]}};
+    const auto setup_move = uci_move_to_move(solution.front(), position);
+    position.make_move(setup_move);
+
+    chesscore::MoveList moves{};
+    auto test_position{position};
+    for (size_t index = 1; index < solution.size(); ++index) {
+        const auto move = uci_move_to_move(solution[index], test_position);
+        moves.push_back(move);
+        test_position.make_move(move);
+    }
+
+    puzzles.emplace_back(fields[0], position, moves);
+}
+
+auto write_puzzles(std::ostream &output, const std::vector<MateInXPuzzle> &puzzles) -> void {
+    for (const auto &puzzle : puzzles) {
+        chesscore::EpdRecord record{};
+        record.id = puzzle.id;
+        record.position = puzzle.position;
+        record.bm.push_back(convert_to_san_move(puzzle.best_move(), puzzle.position));
+        convert_to_san_moves(puzzle.moves, puzzle.position, record.pv);
+        write_epd_record(output, record);
+    }
+}
+
+auto uci_move_to_move(const std::string &uci_str, const chesscore::Position &position) -> chesscore::Move {
     const auto exp_move = chessuci::parse_uci_move(uci_str);
     if (!exp_move.has_value()) {
         throw Error{std::string{"Failed to parse move "} + uci_str};
@@ -93,23 +145,6 @@ auto convert_move(const std::string &uci_str, const chesscore::Position &positio
         throw Error{std::string{"Failed to find move "} + uci_str};
     }
     return moves.front();
-}
-
-auto extract_puzzle(const std::vector<std::string> &fields, std::vector<MateInXPuzzle> &puzzles) -> void {
-    const auto solution = split_fields(fields[2], " ");
-    auto position = chesscore::Position{chesscore::FenString{fields[1]}};
-    const auto setup_move = convert_move(solution.front(), position);
-    position.make_move(setup_move);
-
-    chesscore::MoveList moves{};
-    auto test_position{position};
-    for (size_t index = 1; index < solution.size(); ++index) {
-        const auto move = convert_move(solution[index], test_position);
-        moves.push_back(move);
-        test_position.make_move(move);
-    }
-
-    puzzles.emplace_back(fields[0], position, moves);
 }
 
 auto split_fields(std::string_view line, std::string_view separator) -> std::vector<std::string> {
@@ -127,6 +162,24 @@ auto split_fields(std::string_view line, std::string_view separator) -> std::vec
     return fields;
 }
 
-auto is_mate_puzzle(std::string_view theme) -> bool {
-    return theme.contains(" mate ") || theme.contains(",mate") || theme.contains("mate,");
+auto convert_to_san_move(const chesscore::Move &move, const chesscore::Position &position) -> std::string {
+    const auto legal_moves = position.all_legal_moves();
+    const auto opt_san = chessgame::generate_san_move(move, legal_moves);
+    if (opt_san.has_value()) {
+        return opt_san.value().san_string;
+    }
+    throw Error{"Failed to convert move to SAN"};
+}
+
+auto convert_to_san_moves(const chesscore::MoveList &moves, chesscore::Position position, chesscore::EpdRecord::move_list &list) -> void {
+    for (const auto &move : moves) {
+        const auto legal_moves = position.all_legal_moves();
+        const auto opt_san = chessgame::generate_san_move(move, legal_moves);
+        if (opt_san.has_value()) {
+            list.push_back(opt_san.value().san_string);
+            position.make_move(move);
+        } else {
+            throw Error{"Failed to convert move to SAN"};
+        }
+    }
 }

@@ -11,11 +11,9 @@ add_executable(lichess_converter
     src/lichess_converter.cpp
 )
 
-find_package(chesscore CONFIG REQUIRED COMPONENTS chesscore)
-find_package(chessuci CONFIG REQUIRED)
-
 target_link_libraries(lichess_converter
     PRIVATE
     chesscore::chesscore
+    ChessGame::ChessGame
     ChessUCI::ChessUCI
 )
