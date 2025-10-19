@@ -22,3 +22,7 @@ TEST_CASE("Evaluation.Black mated", "[evaluation]") {
     CHECK(evaluator.evaluate(position, Color::White) == Score::Mate);
     CHECK(evaluator.evaluate(position, Color::Black) == -Score::Mate);
 }
+
+TEST_CASE("Evaluation.Material", "[evaluation]") {
+    FAIL();
+}
