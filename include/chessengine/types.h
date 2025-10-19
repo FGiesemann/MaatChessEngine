@@ -144,6 +144,11 @@ struct EvaluatedMove {
     return Score{value};
 }
 
+[[nodiscard]] constexpr auto operator+(Score lhs, Depth rhs) -> Score {
+    auto value = static_cast<Score::value_type>(lhs.value + rhs.value);
+    return Score{value};
+}
+
 [[nodiscard]] constexpr auto operator-(Depth lhs, Depth rhs) -> Depth {
     Depth result{lhs};
     return result -= rhs;
@@ -162,7 +167,7 @@ constexpr auto is_losing_score(Score score) -> bool {
     return score <= -(Score::Mate - Depth::MaxMateDepth);
 }
 
-constexpr auto is_decisive_scode(Score score) -> bool {
+constexpr auto is_decisive_score(Score score) -> bool {
     return is_winning_score(score) || is_losing_score(score);
 }
 
