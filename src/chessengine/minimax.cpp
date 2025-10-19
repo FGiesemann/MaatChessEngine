@@ -15,7 +15,12 @@ auto MinimaxSearch::best_move(const chesscore::Position &position) const -> Eval
     auto best_value = Score::NegInfinity;
     for (const auto &move : m_position.all_legal_moves()) {
         m_position.make_move(move);
-        const auto value = minimax(m_config.max_depth, Score::NegInfinity, Score::Infinity, false);
+        auto value = minimax(m_config.max_depth - Depth::Step, Score::NegInfinity, Score::Infinity, false);
+        if (is_winning_score(value)) {
+            value = value - Depth::Step;
+        } else if (is_losing_score(value)) {
+            value = value + Depth::Step;
+        }
         m_position.unmake_move(move);
         if (value > best_value) {
             best_move = move;
@@ -39,7 +44,13 @@ auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizin
         auto best_value = Score::NegInfinity;
         for (const auto &move : all_legal_moves) {
             m_position.make_move(move);
-            best_value = std::max(best_value, minimax(--depth, alpha, beta, false));
+            auto value = minimax(depth - Depth::Step, alpha, beta, false);
+            if (is_winning_score(value)) {
+                value = value - Depth::Step;
+            } else if (is_losing_score(value)) {
+                value = value + Depth::Step;
+            }
+            best_value = std::max(best_value, value);
             m_position.unmake_move(move);
             alpha = std::max(alpha, best_value);
             if (m_config.use_alpha_beta_pruning && (beta <= alpha)) {
@@ -51,7 +62,13 @@ auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizin
         auto best_value = Score::Infinity;
         for (const auto &move : all_legal_moves) {
             m_position.make_move(move);
-            best_value = std::min(best_value, minimax(--depth, alpha, beta, true));
+            auto value = minimax(depth - Depth::Step, alpha, beta, true);
+            if (is_winning_score(value)) {
+                value = value - Depth::Step;
+            } else if (is_losing_score(value)) {
+                value = value + Depth::Step;
+            }
+            best_value = std::min(best_value, value);
             m_position.unmake_move(move);
             beta = std::min(beta, best_value);
             if (m_config.use_alpha_beta_pruning && (beta <= alpha)) {
