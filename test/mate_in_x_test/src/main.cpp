@@ -78,8 +78,8 @@ auto perform_test(const chesscore::EpdRecord &test) -> TestResult {
     std::cout << '[' << test.id.value() << "] (" << std::setw(2) << test_result.expected_depth.value << ") ";
 
     chessengine::Evaluator evaluator{chessengine::EvaluatorConfig{}};
-    chessengine::MinimaxSearch search{chessengine::MinimaxConfig{.max_depth = test_result.expected_depth + chessengine::Depth::Step}, evaluator};
-    const auto result = search.best_move(test.position);
+    chessengine::MinimaxSearch search{chessengine::MinimaxConfig{}, evaluator};
+    const auto result = search.best_move(test.position, test_result.expected_depth + chessengine::Depth::Step);
     test_result.search_stats = search.search_stats();
     test_result.found_move = result.move;
     if (is_winning_score(result.score)) {

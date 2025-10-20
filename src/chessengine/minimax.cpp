@@ -7,7 +7,7 @@
 
 namespace chessengine {
 
-auto MinimaxSearch::best_move(const chesscore::Position &position) const -> EvaluatedMove {
+auto MinimaxSearch::best_move(const chesscore::Position &position, Depth depth) const -> EvaluatedMove {
     m_stats = SearchStats{};
     m_position = position;
     m_color_to_evaluate = m_position.side_to_move();
@@ -17,7 +17,7 @@ auto MinimaxSearch::best_move(const chesscore::Position &position) const -> Eval
     m_stats.nodes += 1;
     for (const auto &move : m_position.all_legal_moves()) {
         m_position.make_move(move);
-        auto value = minimax(m_config.max_depth - Depth::Step, Score::NegInfinity, Score::Infinity, false);
+        auto value = minimax(depth - Depth::Step, Score::NegInfinity, Score::Infinity, false);
         if (is_winning_score(value)) {
             value = value - Depth::Step;
         } else if (is_losing_score(value)) {
