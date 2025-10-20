@@ -5,7 +5,7 @@
 #include <chesscore/epd.h>
 #include <chessgame/san.h>
 
-#include "chessengine/search.h"
+#include "chessengine/minimax.h"
 
 struct TestResult {
     bool found_mate{false};
@@ -75,7 +75,9 @@ auto perform_test(const chesscore::EpdRecord &test) -> TestResult {
 
     std::cout << '[' << test.id.value() << "] (" << std::setw(2) << test_result.expected_depth.value << ") ";
 
-    const auto result = chessengine::find_best_move(test.position);
+    chessengine::Evaluator evaluator{chessengine::EvaluatorConfig{}};
+    chessengine::MinimaxSearch search{chessengine::MinimaxConfig{.max_depth = test_result.expected_depth + chessengine::Depth::Step}, evaluator};
+    const auto result = search.best_move(test.position);
     test_result.found_move = result.move;
     if (is_winning_score(result.score)) {
         test_result.found_mate = true;
