@@ -8,11 +8,13 @@
 namespace chessengine {
 
 auto MinimaxSearch::best_move(const chesscore::Position &position) const -> EvaluatedMove {
+    m_stats = SearchStats{};
     m_position = position;
     m_color_to_evaluate = m_position.side_to_move();
 
     chesscore::Move best_move{};
     auto best_value = Score::NegInfinity;
+    m_stats.nodes += 1;
     for (const auto &move : m_position.all_legal_moves()) {
         m_position.make_move(move);
         auto value = minimax(m_config.max_depth - Depth::Step, Score::NegInfinity, Score::Infinity, false);
@@ -32,6 +34,7 @@ auto MinimaxSearch::best_move(const chesscore::Position &position) const -> Eval
 }
 
 auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizing_player) const -> Score {
+    m_stats.nodes += 1;
     if (depth == Depth::Zero) {
         return m_evaluator.evaluate(m_position, m_color_to_evaluate);
     }
@@ -54,6 +57,7 @@ auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizin
             m_position.unmake_move(move);
             alpha = std::max(alpha, best_value);
             if (m_config.use_alpha_beta_pruning && (beta <= alpha)) {
+                m_stats.cutoffs += 1;
                 break;
             }
         }
@@ -72,6 +76,7 @@ auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizin
             m_position.unmake_move(move);
             beta = std::min(beta, best_value);
             if (m_config.use_alpha_beta_pruning && (beta <= alpha)) {
+                m_stats.cutoffs += 1;
                 break;
             }
         }
