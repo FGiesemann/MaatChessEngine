@@ -13,6 +13,7 @@ struct TestResult {
     chessengine::Depth found_depth;
     chesscore::Move expected_move;
     chesscore::Move found_move;
+    chessengine::MinimaxSearch::SearchStats search_stats;
 };
 
 auto perform_test(const chesscore::EpdRecord &test) -> TestResult;
@@ -46,19 +47,20 @@ auto main(int argc, const char *argv[]) -> int {
             const auto result = perform_test(test_case);
             ++tests_performed;
             if (!result.found_mate) {
-                std::cout << "Did not find mate!\n";
+                std::cout << "Did not find mate!";
             } else {
                 if (result.found_depth != result.expected_depth) {
-                    std::cout << "Found mate in " << result.found_depth.value << ", but expected " << result.expected_depth.value << '\n';
+                    std::cout << "Found mate in " << result.found_depth.value << ", but expected " << result.expected_depth.value;
                 } else {
                     if (result.found_move != result.expected_move) {
-                        std::cout << "Found move " << to_string(result.found_move) << ", but expected " << to_string(result.expected_move) << '\n';
+                        std::cout << "Found move " << to_string(result.found_move) << ", but expected " << to_string(result.expected_move);
                     } else {
-                        std::cout << "Passed!\n";
+                        std::cout << "Passed!";
                         ++tests_passed;
                     }
                 }
             }
+            std::cout << "  [ nodes: " << result.search_stats.nodes << ", cutoffs: " << result.search_stats.cutoffs << " ]\n";
         } catch (const std::exception &e) {
             std::cerr << e.what() << '\n';
             continue;
@@ -78,6 +80,7 @@ auto perform_test(const chesscore::EpdRecord &test) -> TestResult {
     chessengine::Evaluator evaluator{chessengine::EvaluatorConfig{}};
     chessengine::MinimaxSearch search{chessengine::MinimaxConfig{.max_depth = test_result.expected_depth + chessengine::Depth::Step}, evaluator};
     const auto result = search.best_move(test.position);
+    test_result.search_stats = search.search_stats();
     test_result.found_move = result.move;
     if (is_winning_score(result.score)) {
         test_result.found_mate = true;

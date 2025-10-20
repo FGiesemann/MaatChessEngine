@@ -28,9 +28,26 @@ class MinimaxSearch {
 public:
     MinimaxSearch(MinimaxConfig config, const Evaluator &evaluator) : m_config{std::move(config)}, m_evaluator{evaluator} {}
     auto best_move(const chesscore::Position &position) const -> EvaluatedMove;
+
+    /**
+     * \brief Statistics of the last search.
+     */
+    struct SearchStats {
+        std::uint64_t nodes{0};   ///< Number of noes evaluated during search.
+        std::uint64_t cutoffs{0}; ///< Number of branches cut off during search.
+    };
+
+    /**
+     * \brief Get the search statistics.
+     *
+     * Gives the statistics of the last search.
+     * \return Statistics of the last search.
+     */
+    auto search_stats() const -> SearchStats { return m_stats; }
 private:
     MinimaxConfig m_config;
     Evaluator m_evaluator;
+    mutable SearchStats m_stats;
     mutable chesscore::Position m_position;
     mutable chesscore::Color m_color_to_evaluate;
 
