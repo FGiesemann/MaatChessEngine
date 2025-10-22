@@ -5,7 +5,7 @@
 #include <chesscore/epd.h>
 #include <chessgame/san.h>
 
-#include "chessengine/minimax.h"
+#include "chessengine/search.h"
 
 struct TestResult {
     bool found_mate{false};
@@ -13,10 +13,10 @@ struct TestResult {
     chessengine::Depth found_depth;
     chesscore::Move expected_move;
     chesscore::Move found_move;
-    chessengine::MinimaxSearch::SearchStats search_stats;
+    chessengine::SearchStats search_stats;
 };
 
-auto perform_test(const chesscore::EpdRecord &test) -> TestResult;
+auto perform_test(const chesscore::EpdRecord &test, const chessengine::Config &config) -> TestResult;
 auto convert_from_san(const std::string &san, const chesscore::Position &position) -> chesscore::Move;
 
 auto main(int argc, const char *argv[]) -> int {
@@ -41,10 +41,19 @@ auto main(int argc, const char *argv[]) -> int {
 
     int tests_performed{0};
     int tests_passed{0};
+
+    chessengine::Config config{
+        .minimax_config{
+            .use_alpha_beta_pruning = true,
+        },
+        .search_config{.max_depth = chessengine::Depth{4}, .iterative_deepening = true},
+        .evaluator_config{}
+    };
+
     for (const auto &test_case : test_suite) {
         std::cout << "Test " << std::setw(places) << (tests_performed + 1) << ": ";
         try {
-            const auto result = perform_test(test_case);
+            const auto result = perform_test(test_case, config);
             ++tests_performed;
             if (!result.found_mate) {
                 std::cout << "Did not find mate!";
@@ -70,16 +79,17 @@ auto main(int argc, const char *argv[]) -> int {
     return 0;
 }
 
-auto perform_test(const chesscore::EpdRecord &test) -> TestResult {
+auto perform_test(const chesscore::EpdRecord &test, const chessengine::Config &config) -> TestResult {
     TestResult test_result{};
     test_result.expected_depth = chessengine::Depth{static_cast<chessengine::Depth::value_type>(test.pv.size())};
     test_result.expected_move = convert_from_san(test.bm.front(), test.position);
 
     std::cout << '[' << test.id.value() << "] (" << std::setw(2) << test_result.expected_depth.value << ") ";
 
-    chessengine::Evaluator evaluator{chessengine::EvaluatorConfig{}};
-    chessengine::MinimaxSearch search{chessengine::MinimaxConfig{}, evaluator};
-    const auto result = search.best_move(test.position, test_result.expected_depth + chessengine::Depth::Step);
+    chessengine::Config test_config{config};
+    test_config.search_config.max_depth = chessengine::Depth{test_result.expected_depth + chessengine::Depth::Step};
+    chessengine::Search search{config};
+    const auto result = search.best_move(test.position);
     test_result.search_stats = search.search_stats();
     test_result.found_move = result.move;
     if (is_winning_score(result.score)) {
