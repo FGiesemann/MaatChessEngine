@@ -90,7 +90,7 @@ struct [[nodiscard]] Depth : public StrongType<std::int16_t, struct DepthTag> {
 
 struct EvaluatedMove {
     chesscore::Move move;
-    Score score;
+    Score score{Score::NegInfinity};
 };
 
 /**

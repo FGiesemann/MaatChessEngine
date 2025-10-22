@@ -11,6 +11,7 @@
 
 #include "chessengine/config.h"
 #include "chessengine/evaluation.h"
+#include "chessengine/search.h"
 
 namespace chessengine {
 
@@ -24,14 +25,6 @@ class MinimaxSearch {
 public:
     MinimaxSearch(MinimaxConfig config, const Evaluator &evaluator) : m_config{std::move(config)}, m_evaluator{evaluator} {}
     auto best_move(const chesscore::Position &position, Depth depth) const -> EvaluatedMove;
-
-    /**
-     * \brief Statistics of the last search.
-     */
-    struct SearchStats {
-        std::uint64_t nodes{0};   ///< Number of noes evaluated during search.
-        std::uint64_t cutoffs{0}; ///< Number of branches cut off during search.
-    };
 
     /**
      * \brief Get the search statistics.
