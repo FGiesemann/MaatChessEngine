@@ -9,13 +9,10 @@
 #include <chesscore/move.h>
 #include <chesscore/position.h>
 
+#include "chessengine/config.h"
 #include "chessengine/evaluation.h"
 
 namespace chessengine {
-
-struct MinimaxConfig {
-    bool use_alpha_beta_pruning{true};
-};
 
 /**
  * \brief Implement minimax search with alpha-beta-pruning.
