@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <ranges>
 
 #include <chesscore/epd.h>
 #include <chessgame/san.h>
@@ -11,7 +12,7 @@ struct TestResult {
     bool found_mate{false};
     chessengine::Depth expected_depth;
     chessengine::Depth found_depth;
-    chesscore::Move expected_move;
+    chesscore::MoveList expected_moves;
     chesscore::Move found_move;
     chessengine::SearchStats search_stats;
 };
@@ -61,8 +62,10 @@ auto main(int argc, const char *argv[]) -> int {
                 if (result.found_depth != result.expected_depth) {
                     std::cout << "Found mate in " << result.found_depth.value << ", but expected " << result.expected_depth.value;
                 } else {
-                    if (result.found_move != result.expected_move) {
-                        std::cout << "Found move " << to_string(result.found_move) << ", but expected " << to_string(result.expected_move);
+                    if (!chesscore::move_list_contains(result.expected_moves, result.found_move)) {
+                        std::cout << "Found move " << to_string(result.found_move) << ", but expected "
+                                  << (result.expected_moves | std::views::transform([&](const auto &move) { return to_string(move); }) | std::views::join_with(std::string{", "}) |
+                                      std::ranges::to<std::string>());
                     } else {
                         std::cout << "Passed!";
                         ++tests_passed;
@@ -82,7 +85,7 @@ auto main(int argc, const char *argv[]) -> int {
 auto perform_test(const chesscore::EpdRecord &test, const chessengine::Config &config) -> TestResult {
     TestResult test_result{};
     test_result.expected_depth = chessengine::Depth{static_cast<chessengine::Depth::value_type>(test.pv.size())};
-    test_result.expected_move = convert_from_san(test.bm.front(), test.position);
+    test_result.expected_moves = std::views::transform(test.bm, [&](const auto &move) { return convert_from_san(move, test.position); }) | std::ranges::to<chesscore::MoveList>();
 
     std::cout << '[' << test.id.value() << "] (" << std::setw(2) << test_result.expected_depth.value << ") ";
 
