@@ -36,15 +36,21 @@ struct SearchConfig {
 class EvaluatorConfig {
 public:
     /**
+     * \brief The scores for each piece type.
+     *
+     * The values have to be given in the same order as the piece types in the
+     * chesscore::PieceType enumeration.
+     */
+    Score piece_values[6]{Score{100}, Score{500}, Score{300}, Score{300}, Score{900}, Score{0}};
+
+    /**
      * \brief Get the value for a piece of a given type.
      *
      * \param piece_type Type of the piece.
      * \return Value for a piece of the given type.
      */
-    auto piece_value(chesscore::PieceType piece_type) const -> Score { return m_piece_values[get_index(piece_type)]; }
+    auto piece_value(chesscore::PieceType piece_type) const -> Score { return piece_values[get_index(piece_type)]; }
     auto empty_board_value() const -> Score { return Score{0}; }
-private:
-    Score m_piece_values[6]{Score{100}, Score{300}, Score{300}, Score{500}, Score{900}, Score{0}}; // same order as chesscore piece types
 
     static_assert(get_index(chesscore::PieceType::Pawn) == 0);
     static_assert(get_index(chesscore::PieceType::Rook) == 1);
