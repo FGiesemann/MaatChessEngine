@@ -27,6 +27,16 @@ public:
      * \return If the active polayer is checkmate or not.
      */
     static auto is_mate(const chesscore::Position &position) -> bool;
+
+    /**
+     * \brief Calculate the material score for a player.
+     *
+     * The material score is the sum of the scores of pieces of the given color.
+     * These scores are described in the EvaluatorConfig.
+     * \param position The position to evaluate.
+     * \param color The color for which to evaluate.
+     * \return The calculated score.
+     */
     auto countup_material(const chesscore::Position &position, chesscore::Color color) const -> Score;
 private:
     EvaluatorConfig m_config{};

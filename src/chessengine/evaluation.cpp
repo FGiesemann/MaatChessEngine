@@ -21,7 +21,7 @@ auto Evaluator::is_mate(const chesscore::Position &position) -> bool {
 auto Evaluator::countup_material(const chesscore::Position &position, chesscore::Color color) const -> Score {
     Score material{0};
     for (const auto piece_type : chesscore::all_piece_types) {
-        material += m_config.piece_value(piece_type) * position.board().piece_count(chesscore::Piece{piece_type, color});
+        material += m_config.piece_value(piece_type) * position.board().piece_count(chesscore::Piece{.type = piece_type, .color = color});
     }
     return material;
 }
