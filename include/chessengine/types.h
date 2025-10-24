@@ -13,13 +13,30 @@
 
 namespace chessengine {
 
+/**
+ * \brief Base implementation for a strong (integral) type.
+ *
+ * \tparam T The underlying base type.
+ * \tparam Tag Some name to distinguish different realisations of strong types.
+ */
 template<typename T, typename Tag>
 struct StrongType {
-    using value_type = T;
-    value_type value{};
+    using value_type = T; ///< Underlying type.
+    value_type value{};   ///< The value.
 
+    /**
+     * \brief Construct an instance of the strong type with a value.
+     *
+     * \param value The value.
+     */
     constexpr explicit StrongType(value_type value = {}) : value{value} {}
 
+    /**
+     * \brief Comparison operator for values of the same strong type.
+     *
+     * \param other The other value to compare against.
+     * \return Comparison result.
+     */
     [[nodiscard]] constexpr std::strong_ordering operator<=>(const StrongType &other) const = default;
 };
 
@@ -44,11 +61,15 @@ struct [[nodiscard]] Score : public StrongType<std::int16_t, struct ScoreTag> {
 
     constexpr auto negative() const -> bool { return value < 0; }
 
-    static const Score Infinity;
-    static const Score NegInfinity;
-    static const Score Mate;
+    static const Score Infinity;    ///< A Score regarded as infinity.
+    static const Score NegInfinity; ///< A Score regarded as negative inifity.
+    static const Score Mate;        ///< The score for a mate in the current position.
 };
 
+/**
+ * \brief A search depth or a number of steps.
+ *
+ */
 struct [[nodiscard]] Depth : public StrongType<std::int16_t, struct DepthTag> {
     using StrongType::StrongType;
 
@@ -83,14 +104,9 @@ struct [[nodiscard]] Depth : public StrongType<std::int16_t, struct DepthTag> {
         return old;
     }
 
-    static const Depth Zero;
-    static const Depth Step;
-    static const Depth MaxMateDepth;
-};
-
-struct EvaluatedMove {
-    chesscore::Move move;
-    Score score{Score::NegInfinity};
+    static const Depth Zero;         ///< Pre-defined zero depth.
+    static const Depth Step;         ///< Pre-defines depth of one.
+    static const Depth MaxMateDepth; ///< The maximum depth in the search for a mate.
 };
 
 /**
@@ -159,24 +175,61 @@ struct EvaluatedMove {
     return result += rhs;
 }
 
+/**
+ * \brief Checks, if the given score describes a winning position.
+ *
+ * A winning position is a position with a (forced) mate.
+ * \param score The score.
+ * \return If the score describes a winning position.
+ */
 constexpr auto is_winning_score(Score score) -> bool {
     return score >= (Score::Mate - Depth::MaxMateDepth);
 }
 
+/**
+ * \brief Checks, if the given score describes a losing position.
+ *
+ * A losing position is a position with a (forced) mate for the opponent.
+ * \param score The score.
+ * \return If the score describes a losing position.
+ */
 constexpr auto is_losing_score(Score score) -> bool {
     return score <= -(Score::Mate - Depth::MaxMateDepth);
 }
 
+/**
+ * \brief Checks, if the given score is for a winning or losing position.
+ *
+ * Decisive means either winning or losing.
+ * \param score The score.
+ * \return If the score describes a decisive position.
+ */
 constexpr auto is_decisive_score(Score score) -> bool {
     return is_winning_score(score) || is_losing_score(score);
 }
 
+/**
+ * \brief Extract the number of plys from a mate score.
+ *
+ * A mate score is higher for mates in less half-moves. This function extracts
+ * the number of half-moves (plys) needed to reach the mate from the score.
+ * \param score The score.
+ * \return The number of half-moves (plys) to reach the mate.
+ */
 constexpr auto ply_to_mate(Score score) -> Depth {
     if (score.negative()) {
         return Depth{(Score::Mate + score).value};
     }
     return Depth{(Score::Mate - score).value};
 }
+
+/**
+ * \brief A move combined with a score.
+ */
+struct EvaluatedMove {
+    chesscore::Move move;            ///< The move.
+    Score score{Score::NegInfinity}; ///< Scor for the move.
+};
 
 } // namespace chessengine
 
