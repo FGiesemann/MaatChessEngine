@@ -31,7 +31,7 @@ auto MinimaxSearch::best_move(const chesscore::Position &position, Depth depth) 
         }
     }
 
-    return {best_move, best_value};
+    return {.move = best_move, .score = best_value};
 }
 
 auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizing_player) const -> Score {
