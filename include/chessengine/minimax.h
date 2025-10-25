@@ -23,7 +23,8 @@ namespace chessengine {
  */
 class MinimaxSearch {
 public:
-    MinimaxSearch(MinimaxConfig config, const Evaluator &evaluator) : m_config{std::move(config)}, m_evaluator{evaluator} {}
+    MinimaxSearch(MinimaxConfig config, const Evaluator &evaluator, const MoveOrdering &move_ordering)
+        : m_config{std::move(config)}, m_evaluator{evaluator}, m_move_ordering{move_ordering} {}
     auto best_move(const chesscore::Position &position, Depth depth) const -> EvaluatedMove;
 
     /**
@@ -34,13 +35,16 @@ public:
      */
     auto search_stats() const -> SearchStats { return m_stats; }
 private:
-    MinimaxConfig m_config;
-    Evaluator m_evaluator;
-    mutable SearchStats m_stats;
+    MinimaxConfig m_config{};
+    Evaluator m_evaluator{};
+    MoveOrdering m_move_ordering{};
+    mutable SearchStats m_stats{};
     mutable chesscore::Position m_position;
     mutable chesscore::Color m_color_to_evaluate;
 
     auto minimax(Depth depth, Score alpha, Score beta, bool maximizing_player) const -> Score;
+
+    auto moves_to_search() const -> chesscore::MoveList;
 };
 
 } // namespace chessengine
