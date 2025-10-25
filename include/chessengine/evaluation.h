@@ -38,6 +38,16 @@ public:
      * \return The calculated score.
      */
     auto countup_material(const chesscore::Position &position, chesscore::Color color) const -> Score;
+
+    /**
+     * \brief Accumulate the scores for pieces on squares.
+     *
+     * Calculates the sum of the scores for each piece on its square.
+     * \param position The position to evaluate.
+     * \param color The color for which to evaluate.
+     * \return The caculated score.
+     */
+    auto evaluate_pieces_on_squares(const chesscore::Position &position, chesscore::Color color) const -> Score;
 private:
     EvaluatorConfig m_config{};
 };

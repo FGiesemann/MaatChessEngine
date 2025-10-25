@@ -11,7 +11,7 @@ auto Evaluator::evaluate(const chesscore::Position &position, chesscore::Color c
     if (is_mate(position)) {
         return color == position.side_to_move() ? -Score::Mate : Score::Mate;
     }
-    return countup_material(position, color) - countup_material(position, chesscore::other_color(color));
+    return countup_material(position, color) - countup_material(position, chesscore::other_color(color)) + evaluate_pieces_on_squares(position, color);
 }
 
 auto Evaluator::is_mate(const chesscore::Position &position) -> bool {
@@ -24,6 +24,19 @@ auto Evaluator::countup_material(const chesscore::Position &position, chesscore:
         material += m_config.piece_value(piece_type) * position.board().piece_count(chesscore::Piece{.type = piece_type, .color = color});
     }
     return material;
+}
+
+auto Evaluator::evaluate_pieces_on_squares(const chesscore::Position &position, chesscore::Color color) const -> Score {
+    Score score{0};
+    chesscore::Square square{chesscore::Square::A1};
+    for (int i = 0; i < chesscore::Square::count; ++i) {
+        const auto piece = position.board().get_piece(square);
+        if (piece.has_value() && piece->color == color) {
+            score += m_config.piece_on_square_value(piece.value(), square);
+        }
+        square += 1;
+    }
+    return score;
 }
 
 } // namespace chessengine
