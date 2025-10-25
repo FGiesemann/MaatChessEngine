@@ -15,7 +15,8 @@ auto MinimaxSearch::best_move(const chesscore::Position &position, Depth depth) 
     chesscore::Move best_move{};
     auto best_value = Score::NegInfinity;
     m_stats.nodes += 1;
-    for (const auto &move : m_position.all_legal_moves()) {
+    const auto moves = moves_to_search();
+    for (const auto &move : moves) {
         m_position.make_move(move);
         auto value = minimax(depth - Depth::Step, Score::NegInfinity, Score::Infinity, false);
         if (is_winning_score(value)) {
@@ -38,14 +39,14 @@ auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizin
     if (depth == Depth::Zero) {
         return m_evaluator.evaluate(m_position, m_color_to_evaluate);
     }
-    const auto all_legal_moves = m_position.all_legal_moves();
-    if (all_legal_moves.empty()) {
+    const auto moves = moves_to_search();
+    if (moves.empty()) {
         return m_evaluator.evaluate(m_position, m_color_to_evaluate);
     }
 
     if (maximizing_player) {
         auto best_value = Score::NegInfinity;
-        for (const auto &move : all_legal_moves) {
+        for (const auto &move : moves) {
             m_position.make_move(move);
             auto value = minimax(depth - Depth::Step, alpha, beta, false);
             if (is_winning_score(value)) {
@@ -64,7 +65,7 @@ auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizin
         return best_value;
     } else {
         auto best_value = Score::Infinity;
-        for (const auto &move : all_legal_moves) {
+        for (const auto &move : moves) {
             m_position.make_move(move);
             auto value = minimax(depth - Depth::Step, alpha, beta, true);
             if (is_winning_score(value)) {
@@ -82,6 +83,14 @@ auto MinimaxSearch::minimax(Depth depth, Score alpha, Score beta, bool maximizin
         }
         return best_value;
     }
+}
+
+auto MinimaxSearch::moves_to_search() const -> chesscore::MoveList {
+    auto moves = m_position.all_legal_moves();
+    if (m_config.use_move_ordering) {
+        sort_moves(moves, m_move_ordering);
+    }
+    return moves;
 }
 
 } // namespace chessengine

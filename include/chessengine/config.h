@@ -17,6 +17,7 @@ namespace chessengine {
  */
 struct MinimaxConfig {
     bool use_alpha_beta_pruning{true}; ///< If alpha-beta-pruning should be applied.
+    bool use_move_ordering{true};      ///< If move ordering should be used.
 };
 
 /**
@@ -160,6 +161,8 @@ public:
         }
         // clang-format on
     };
+
+    Score pawn_promotion_score{100}; ///< Bonus for a promoting pawn.
 
     /**
      * \brief Get the value for a piece of a given type.
