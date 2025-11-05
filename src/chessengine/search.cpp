@@ -1,5 +1,5 @@
 /* ************************************************************************** *
- * Chess Engine                                                               *
+ * Chess Engine Maat                                                          *
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
@@ -18,6 +18,7 @@ auto Search::best_move(const chesscore::Position &position) const -> EvaluatedMo
     Depth current_depth = m_config.search_config.iterative_deepening ? Depth{1} : m_config.search_config.max_depth;
     EvaluatedMove current_best_move{};
     while (current_depth <= m_config.search_config.max_depth) {
+        // feed in the best move from the previous iteration to search first...
         auto best_move = minimax.best_move(position, current_depth);
         m_search_stats = minimax.search_stats();
         if (is_winning_score(best_move.score)) {

@@ -13,8 +13,8 @@ target_include_directories(ChessEngineLib PUBLIC
 )
 target_link_libraries(ChessEngineLib PUBLIC ChessGame::ChessGame)
 
-add_executable(ChessEngine
+add_executable(maat
     app/main.cpp
 )
-add_compiler_warnings(ChessEngine)
-target_link_libraries(ChessEngine PRIVATE ChessEngineLib)
+add_compiler_warnings(maat)
+target_link_libraries(maat PRIVATE ChessEngineLib)
