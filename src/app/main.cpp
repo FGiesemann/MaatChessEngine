@@ -4,10 +4,12 @@
  * ************************************************************************** */
 
 #include <iostream>
+#include <thread>
 
-#include "chessengine/config.h"
+#include "engine.h"
 
 auto main() -> int {
-    std::cout << "Hello, World!\n";
+    chessengine::maat::UCIEngine engine{std::cin, std::cout};
+    engine.run();
     return 0;
 }

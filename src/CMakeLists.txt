@@ -15,6 +15,8 @@ target_link_libraries(ChessEngineLib PUBLIC ChessGame::ChessGame)
 
 add_executable(maat
     app/main.cpp
+
+    app/engine.cpp
 )
 add_compiler_warnings(maat)
-target_link_libraries(maat PRIVATE ChessEngineLib)
+target_link_libraries(maat PRIVATE ChessEngineLib ChessUCI::ChessUCI)
