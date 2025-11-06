@@ -6,34 +6,16 @@
 #ifndef CHESS_ENGINE_MAAT_ENGINE_H
 #define CHESS_ENGINE_MAAT_ENGINE_H
 
-#include <condition_variable>
-#include <iosfwd>
-#include <mutex>
-
-#include <chessuci/engine_handler.h>
+#include <chesscore/position.h>
 
 namespace chessengine::maat {
 
-class Engine {};
-
-class UCIEngine {
+class Engine {
 public:
-    explicit UCIEngine(std::istream &in_stream = std::cin, std::ostream &out_stream = std::cout);
-
-    auto run() -> void;
-    auto is_running() const -> bool { return m_handler.is_running(); };
+    auto set_position(const chesscore::Position &position) -> void;
+    auto position() const -> const chesscore::Position & { return m_position; }
 private:
-    chessuci::UCIEngineHandler m_handler;
-    Engine m_engine;
-    std::condition_variable m_quit_signal;
-    std::mutex m_quit_mutex;
-
-    auto register_callbacks() -> void;
-
-    auto uci_callback() -> void;
-    auto quit_callback() -> void;
-
-    auto unknown_command_handler(const chessuci::TokenList &tokens) -> void;
+    chesscore::Position m_position;
 };
 
 } // namespace chessengine::maat
