@@ -6,7 +6,7 @@
 #include <iostream>
 #include <thread>
 
-#include "engine.h"
+#include "uci.h"
 
 auto main() -> int {
     chessengine::maat::UCIEngine engine{std::cin, std::cout};

@@ -17,6 +17,7 @@ add_executable(maat
     app/main.cpp
 
     app/engine.cpp
+    app/uci.cpp
 )
 add_compiler_warnings(maat)
 target_link_libraries(maat PRIVATE ChessEngineLib ChessUCI::ChessUCI)
