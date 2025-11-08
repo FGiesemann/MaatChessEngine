@@ -18,6 +18,9 @@ namespace chessengine::maat {
 
 class Engine {
 public:
+    static const std::string identifier; ///< Name an version of the engine.
+    static const std::string author;     ///< Author of the engine.
+
     /**
      * \brief Reset internal state in preparation for a new game.
      */

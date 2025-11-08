@@ -59,7 +59,7 @@ auto UCIEngine::register_callbacks() -> void {
 }
 
 auto UCIEngine::uci_callback() -> void {
-    m_handler.send_id({.name = "Maat v0.1", .author = "Florian Giesemann"});
+    m_handler.send_id({.name = Engine::identifier, .author = Engine::author});
     m_handler.send_uciok();
 }
 
