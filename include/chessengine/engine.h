@@ -6,6 +6,9 @@
 #ifndef CHESS_ENGINE_MAAT_ENGINE_H
 #define CHESS_ENGINE_MAAT_ENGINE_H
 
+#include <atomic>
+#include <thread>
+
 #include <chesscore/position.h>
 
 namespace chessengine::maat {
@@ -19,10 +22,13 @@ public:
 
     auto start_search(/* some options */) -> void;
     auto stop_search() -> void;
+    auto is_searching() const -> bool { return m_search_running.load(); }
     auto best_move() const -> chesscore::Move;
 private:
     chesscore::Position m_position;
     bool m_debugging{false};
+    std::thread m_search_thread{};
+    std::atomic<bool> m_search_running{false};
 };
 
 } // namespace chessengine::maat

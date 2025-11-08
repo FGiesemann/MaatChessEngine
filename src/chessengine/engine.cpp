@@ -3,7 +3,7 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
-#include "engine.h"
+#include "chessengine/engine.h"
 
 namespace chessengine::maat {
 

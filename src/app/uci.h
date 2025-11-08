@@ -12,7 +12,7 @@
 
 #include <chessuci/engine_handler.h>
 
-#include "engine.h"
+#include "chessengine/engine.h"
 
 namespace chessengine::maat {
 
