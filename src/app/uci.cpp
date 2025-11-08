@@ -62,8 +62,39 @@ auto UCIEngine::uci_callback() -> void {
     m_handler.send_uciok();
 }
 
+auto UCIEngine::debug_callback(bool debug_on) -> void {
+    m_engine.set_debugging(debug_on);
+}
+
+auto UCIEngine::is_ready_callback() -> void {
+    m_handler.send_readyok();
+}
+
+auto UCIEngine::set_option_callback([[maybe_unused]] const chessuci::setoption_command &command) -> void {
+    // currently no options
+}
+
+auto UCIEngine::uci_new_game_callback() -> void {
+    m_engine.new_game();
+}
+
 auto UCIEngine::position_callback(const chessuci::position_command &command) -> void {
     m_engine.set_position(chesscore::Position{chesscore::FenString{command.fen}});
+}
+
+auto UCIEngine::go_callback([[maybe_unused]] const chessuci::go_command &command) -> void {
+    // evaluate command parameters and start search
+    m_engine.start_search();
+}
+
+auto UCIEngine::stop_callback() -> void {
+    m_engine.stop_search();
+    chessuci::bestmove_info move_info{.bestmove = chessuci::UCIMove{m_engine.best_move()}};
+    m_handler.send_bestmove(move_info);
+}
+
+auto UCIEngine::ponder_hit_callback() -> void {
+    // TODO
 }
 
 auto UCIEngine::quit_callback() -> void {

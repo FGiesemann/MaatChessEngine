@@ -31,7 +31,14 @@ private:
     auto register_callbacks() -> void;
 
     auto uci_callback() -> void;
+    auto debug_callback(bool debug_on) -> void;
+    auto is_ready_callback() -> void;
+    auto set_option_callback(const chessuci::setoption_command &command) -> void;
+    auto uci_new_game_callback() -> void;
     auto position_callback(const chessuci::position_command &command) -> void;
+    auto go_callback(const chessuci::go_command &command) -> void;
+    auto stop_callback() -> void;
+    auto ponder_hit_callback() -> void;
     auto quit_callback() -> void;
 
     auto display_board() -> void;
