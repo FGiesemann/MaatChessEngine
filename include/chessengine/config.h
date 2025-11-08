@@ -221,16 +221,16 @@ struct Config {
     MinimaxConfig minimax_config;     ///< Configuration of the search algorithm.
     SearchConfig search_config;       ///< Configuration of the search strategy.
     EvaluatorConfig evaluator_config; ///< Configuration of the evaluation function.
-};
 
-/**
- * \brief Read the configuration from a file.
- *
- * Reads the configuration parameters for the chess engine from the given file.
- * \param filename Path to the config file.
- * \return The config parameters.
- */
-auto read_config_file(const std::filesystem::path &filename) -> Config;
+    /**
+     * \brief Read the configuration from a file.
+     *
+     * Reads the configuration parameters for the chess engine from the given file.
+     * \param filename Path to the config file.
+     * \return The config parameters.
+     */
+    static auto from_file(const std::filesystem::path &filename) -> Config;
+};
 
 } // namespace chessengine
 

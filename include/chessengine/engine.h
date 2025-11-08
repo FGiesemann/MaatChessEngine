@@ -7,9 +7,12 @@
 #define CHESS_ENGINE_MAAT_ENGINE_H
 
 #include <atomic>
+#include <filesystem>
 #include <thread>
 
 #include <chesscore/position.h>
+
+#include "chessengine/config.h"
 
 namespace chessengine::maat {
 
@@ -24,7 +27,11 @@ public:
     auto stop_search() -> void;
     auto is_searching() const -> bool { return m_search_running.load(); }
     auto best_move() const -> chesscore::Move;
+
+    auto set_config(const Config &config) -> void { m_config = config; }
+    auto load_config(const std::filesystem::path &filename) -> void;
 private:
+    Config m_config{};
     chesscore::Position m_position;
     bool m_debugging{false};
     std::thread m_search_thread{};

@@ -7,7 +7,7 @@
 
 namespace chessengine {
 
-auto read_config_file([[maybe_unused]] const std::filesystem::path &filename) -> Config {
+auto Config::from_file([[maybe_unused]] const std::filesystem::path &filename) -> Config {
     return {};
 }
 

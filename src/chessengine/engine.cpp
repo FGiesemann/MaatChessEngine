@@ -32,4 +32,8 @@ auto Engine::set_debugging(bool on) -> void {
     m_debugging = on;
 }
 
+auto Engine::load_config(const std::filesystem::path &filename) -> void {
+    m_config = Config::from_file(filename);
+}
+
 } // namespace chessengine::maat
