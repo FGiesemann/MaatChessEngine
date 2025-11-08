@@ -1,5 +1,6 @@
 add_library(ChessEngineLib
     chessengine/config.cpp
+    chessengine/engine.cpp
     chessengine/evaluation.cpp
     chessengine/minimax.cpp
     chessengine/search.cpp
@@ -16,7 +17,6 @@ target_link_libraries(ChessEngineLib PUBLIC ChessGame::ChessGame)
 add_executable(maat
     app/main.cpp
 
-    app/engine.cpp
     app/uci.cpp
 )
 add_compiler_warnings(maat)
