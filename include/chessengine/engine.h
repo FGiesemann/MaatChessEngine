@@ -21,7 +21,15 @@ public:
     auto new_game() -> void;
     auto set_position(const chesscore::Position &position) -> void;
     auto position() const -> const chesscore::Position & { return m_position; }
-    auto set_debugging(bool on) -> void;
+    /**
+     * \brief Play a move in the game.
+     *
+     * Update the internal position with the given move.
+     * \param move The move.
+     */
+    auto play_move(const chesscore::Move &move) -> void;
+
+    /**
 
     auto start_search(/* some options */) -> void;
     auto stop_search() -> void;
