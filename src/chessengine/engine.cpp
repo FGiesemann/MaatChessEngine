@@ -7,6 +7,9 @@
 
 namespace chessengine::maat {
 
+const std::string Engine::identifier = "Maat v0.1";
+const std::string Engine::author = "Florian Giesemann";
+
 auto Engine::new_game() -> void {
     m_position = chesscore::Position{chesscore::FenString::starting_position()};
 }
