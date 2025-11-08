@@ -7,6 +7,7 @@
 
 #include <chesscore/fen.h>
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 
@@ -78,8 +79,44 @@ auto UCIEngine::uci_new_game_callback() -> void {
     m_engine.new_game();
 }
 
+auto UCIEngine::construct_position(const chessuci::position_command &command) -> chesscore::Position {
+    m_position_setup = command.fen;
+    m_move_list.clear();
+    const auto fen = command.fen == chessuci::position_command::startpos ? chesscore::FenString::starting_position() : chesscore::FenString{command.fen};
+    auto position = chesscore::Position{fen};
+    std::ranges::for_each(command.moves, [&position, this](const chessuci::UCIMove &move) -> void {
+        const auto matched_move = chessuci::convert_legal_move(move, position);
+        if (matched_move.has_value()) {
+            position.make_move(matched_move.value());
+            m_move_list.push_back(move);
+        } else {
+            throw chessuci::UCIError{"Invalid move " + to_string(move)};
+        }
+    });
+    return position;
+}
+
 auto UCIEngine::position_callback(const chessuci::position_command &command) -> void {
-    m_engine.set_position(chesscore::Position{chesscore::FenString{command.fen}});
+    if (m_position_setup.empty()) {
+        m_position_setup = command.fen;
+    }
+    if (m_position_setup != command.fen) {
+        m_engine.set_position(construct_position(command));
+    } else {
+        const auto mismatch = std::mismatch(m_move_list.begin(), m_move_list.end(), command.moves.begin(), command.moves.end());
+        if (mismatch.first == m_move_list.end()) {
+            std::for_each(mismatch.second, command.moves.end(), [this](const chessuci::UCIMove &move) -> void {
+                const auto matched_move = chessuci::convert_legal_move(move, m_engine.position());
+                if (!matched_move.has_value()) {
+                    throw chessuci::UCIError{"Invalid move " + to_string(move)};
+                }
+                m_engine.play_move(matched_move.value());
+                m_move_list.push_back(move);
+            });
+        } else {
+            m_engine.set_position(construct_position(command));
+        }
+    }
 }
 
 auto UCIEngine::go_callback([[maybe_unused]] const chessuci::go_command &command) -> void {

@@ -25,6 +25,8 @@ public:
 private:
     chessuci::UCIEngineHandler m_handler;
     Engine m_engine;
+    std::string m_position_setup{};
+    std::vector<chessuci::UCIMove> m_move_list{}; ///< Moves played so far.
     std::condition_variable m_quit_signal;
     std::mutex m_quit_mutex;
 
@@ -44,6 +46,8 @@ private:
     auto display_board() -> void;
 
     auto unknown_command_handler(const chessuci::TokenList &tokens) -> void;
+
+    auto construct_position(const chessuci::position_command &command) -> chesscore::Position;
 };
 
 } // namespace chessengine::maat
