@@ -113,7 +113,7 @@ struct [[nodiscard]] Depth : public StrongType<std::int16_t, struct DepthTag> {
  * \brief Negation operator.
  *
  * Negates a Score.
- * \param s The score.
+ * \param score The score.
  * \return The negated score.
  */
 [[nodiscard]] constexpr auto operator-(Score score) -> Score {
