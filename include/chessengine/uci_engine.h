@@ -14,7 +14,7 @@
 
 #include "chessengine/chess_engine.h"
 
-namespace chessengine::maat {
+namespace chessengine {
 
 template<typename EngineT = ChessEngine>
 class UCIEngine {
@@ -23,15 +23,9 @@ public:
 
     auto run() -> void;
     auto is_running() const -> bool { return m_handler.is_running(); };
-private:
-    chessuci::UCIEngineHandler m_handler;
-    EngineT m_engine;
-    std::string m_position_setup{};
-    std::vector<chessuci::UCIMove> m_move_list{}; ///< Moves played so far.
-    std::condition_variable m_quit_signal;
-    std::mutex m_quit_mutex;
 
-    auto register_callbacks() -> void;
+    auto engine() const -> const EngineT & { return m_engine; }
+    auto engine() -> EngineT & { return m_engine; }
 
     auto uci_callback() -> void;
     auto debug_callback(bool debug_on) -> void;
@@ -49,8 +43,17 @@ private:
     auto unknown_command_handler(const chessuci::TokenList &tokens) -> void;
 
     auto construct_position(const chessuci::position_command &command) -> chesscore::Position;
+private:
+    chessuci::UCIEngineHandler m_handler;
+    EngineT m_engine;
+    std::string m_position_setup{};
+    std::vector<chessuci::UCIMove> m_move_list{}; ///< Moves played so far.
+    std::condition_variable m_quit_signal;
+    std::mutex m_quit_mutex;
+
+    auto register_callbacks() -> void;
 };
 
-} // namespace chessengine::maat
+} // namespace chessengine
 
 #endif

@@ -3,7 +3,7 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
-#include "uci.h"
+#include "chessengine/uci_engine.h"
 
 #include <chesscore/fen.h>
 
@@ -11,9 +11,12 @@
 #include <sstream>
 #include <string>
 
-namespace chessengine::maat {
+#include "chessengine/test_engine.h"
+
+namespace chessengine {
 
 template class UCIEngine<ChessEngine>;
+template class UCIEngine<TestEngine>;
 
 namespace {
 
@@ -162,4 +165,4 @@ auto UCIEngine<EngineT>::unknown_command_handler(const chessuci::TokenList &toke
     m_handler.send_raw("unknown command " + tokens[0]);
 }
 
-} // namespace chessengine::maat
+} // namespace chessengine

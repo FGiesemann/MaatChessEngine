@@ -3,13 +3,6 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
-#include <iostream>
-#include <thread>
+#include "chessengine/test_engine.h"
 
-#include "chessengine/uci_engine.h"
-
-auto main() -> int {
-    chessengine::UCIEngine engine{std::cin, std::cout};
-    engine.run();
-    return 0;
-}
+namespace chessengine {}

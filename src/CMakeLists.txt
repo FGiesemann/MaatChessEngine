@@ -4,7 +4,9 @@ add_library(ChessEngineLib
     chessengine/evaluation.cpp
     chessengine/minimax.cpp
     chessengine/search.cpp
+    chessengine/test_engine.cpp
     chessengine/types.cpp
+    chessengine/uci_engine.cpp
 )
 add_compiler_warnings(ChessEngineLib)
 target_compile_features(ChessEngineLib PUBLIC cxx_std_23)
@@ -12,12 +14,10 @@ target_include_directories(ChessEngineLib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(ChessEngineLib PUBLIC ChessGame::ChessGame)
+target_link_libraries(ChessEngineLib PUBLIC ChessGame::ChessGame ChessUCI::ChessUCI)
 
 add_executable(maat
     app/main.cpp
-
-    app/uci.cpp
 )
 add_compiler_warnings(maat)
-target_link_libraries(maat PRIVATE ChessEngineLib ChessUCI::ChessUCI)
+target_link_libraries(maat PRIVATE ChessEngineLib)
