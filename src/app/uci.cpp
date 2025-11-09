@@ -97,15 +97,12 @@ auto UCIEngine::construct_position(const chessuci::position_command &command) ->
 }
 
 auto UCIEngine::position_callback(const chessuci::position_command &command) -> void {
-    if (m_position_setup.empty()) {
-        m_position_setup = command.fen;
-    }
     if (m_position_setup != command.fen) {
         m_engine.set_position(construct_position(command));
     } else {
-        const auto mismatch = std::mismatch(m_move_list.begin(), m_move_list.end(), command.moves.begin(), command.moves.end());
-        if (mismatch.first == m_move_list.end()) {
-            std::for_each(mismatch.second, command.moves.end(), [this](const chessuci::UCIMove &move) -> void {
+        const auto mismatch = std::ranges::mismatch(m_move_list, command.moves);
+        if (mismatch.in1 == m_move_list.end()) {
+            std::for_each(mismatch.in2, command.moves.end(), [this](const chessuci::UCIMove &move) -> void {
                 const auto matched_move = chessuci::convert_legal_move(move, m_engine.position());
                 if (!matched_move.has_value()) {
                     throw chessuci::UCIError{"Invalid move " + to_string(move)};
