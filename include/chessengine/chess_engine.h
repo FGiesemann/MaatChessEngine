@@ -3,8 +3,8 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
-#ifndef CHESS_ENGINE_MAAT_ENGINE_H
-#define CHESS_ENGINE_MAAT_ENGINE_H
+#ifndef CHESS_ENGINE_CHESS_ENGINE_H
+#define CHESS_ENGINE_CHESS_ENGINE_H
 
 #include <atomic>
 #include <filesystem>
@@ -14,9 +14,9 @@
 
 #include "chessengine/config.h"
 
-namespace chessengine::maat {
+namespace chessengine {
 
-class Engine {
+class ChessEngine {
 public:
     static const std::string identifier; ///< Name an version of the engine.
     static const std::string author;     ///< Author of the engine.
@@ -116,6 +116,6 @@ private:
     std::atomic<bool> m_search_running{false}; ///< If a search is running.
 };
 
-} // namespace chessengine::maat
+} // namespace chessengine
 
 #endif

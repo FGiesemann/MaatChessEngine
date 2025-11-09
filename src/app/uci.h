@@ -12,10 +12,11 @@
 
 #include <chessuci/engine_handler.h>
 
-#include "chessengine/engine.h"
+#include "chessengine/chess_engine.h"
 
 namespace chessengine::maat {
 
+template<typename EngineT = ChessEngine>
 class UCIEngine {
 public:
     explicit UCIEngine(std::istream &in_stream = std::cin, std::ostream &out_stream = std::cout);
@@ -24,7 +25,7 @@ public:
     auto is_running() const -> bool { return m_handler.is_running(); };
 private:
     chessuci::UCIEngineHandler m_handler;
-    Engine m_engine;
+    EngineT m_engine;
     std::string m_position_setup{};
     std::vector<chessuci::UCIMove> m_move_list{}; ///< Moves played so far.
     std::condition_variable m_quit_signal;

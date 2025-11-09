@@ -13,6 +13,8 @@
 
 namespace chessengine::maat {
 
+template class UCIEngine<ChessEngine>;
+
 namespace {
 
 auto position_to_string(const chesscore::Position &position) -> std::string {
@@ -39,17 +41,20 @@ auto position_to_string(const chesscore::Position &position) -> std::string {
 
 } // namespace
 
-UCIEngine::UCIEngine(std::istream &in_stream, std::ostream &out_stream) : m_handler(in_stream, out_stream) {
+template<typename EngineT>
+UCIEngine<EngineT>::UCIEngine(std::istream &in_stream, std::ostream &out_stream) : m_handler(in_stream, out_stream) {
     register_callbacks();
 }
 
-auto UCIEngine::run() -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::run() -> void {
     m_handler.start();
     std::unique_lock lock{m_quit_mutex};
     m_quit_signal.wait(lock);
 }
 
-auto UCIEngine::register_callbacks() -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::register_callbacks() -> void {
     m_handler.on_uci([this]() -> void { uci_callback(); });
     m_handler.on_position([this](const chessuci::position_command &command) -> void { position_callback(command); });
     m_handler.on_quit([this]() -> void { quit_callback(); });
@@ -58,28 +63,34 @@ auto UCIEngine::register_callbacks() -> void {
     m_handler.on_unknown_command([this](const chessuci::TokenList &tokens) -> void { unknown_command_handler(tokens); });
 }
 
-auto UCIEngine::uci_callback() -> void {
-    m_handler.send_id({.name = Engine::identifier, .author = Engine::author});
+template<typename EngineT>
+auto UCIEngine<EngineT>::uci_callback() -> void {
+    m_handler.send_id({.name = ChessEngine::identifier, .author = ChessEngine::author});
     m_handler.send_uciok();
 }
 
-auto UCIEngine::debug_callback(bool debug_on) -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::debug_callback(bool debug_on) -> void {
     m_engine.set_debugging(debug_on);
 }
 
-auto UCIEngine::is_ready_callback() -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::is_ready_callback() -> void {
     m_handler.send_readyok();
 }
 
-auto UCIEngine::set_option_callback([[maybe_unused]] const chessuci::setoption_command &command) -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::set_option_callback([[maybe_unused]] const chessuci::setoption_command &command) -> void {
     // currently no options
 }
 
-auto UCIEngine::uci_new_game_callback() -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::uci_new_game_callback() -> void {
     m_engine.new_game();
 }
 
-auto UCIEngine::construct_position(const chessuci::position_command &command) -> chesscore::Position {
+template<typename EngineT>
+auto UCIEngine<EngineT>::construct_position(const chessuci::position_command &command) -> chesscore::Position {
     m_position_setup = command.fen;
     m_move_list.clear();
     const auto fen = command.fen == chessuci::position_command::startpos ? chesscore::FenString::starting_position() : chesscore::FenString{command.fen};
@@ -96,7 +107,8 @@ auto UCIEngine::construct_position(const chessuci::position_command &command) ->
     return position;
 }
 
-auto UCIEngine::position_callback(const chessuci::position_command &command) -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::position_callback(const chessuci::position_command &command) -> void {
     if (m_position_setup != command.fen) {
         m_engine.set_position(construct_position(command));
     } else {
@@ -116,31 +128,37 @@ auto UCIEngine::position_callback(const chessuci::position_command &command) -> 
     }
 }
 
-auto UCIEngine::go_callback([[maybe_unused]] const chessuci::go_command &command) -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::go_callback([[maybe_unused]] const chessuci::go_command &command) -> void {
     // evaluate command parameters and start search
     m_engine.start_search();
 }
 
-auto UCIEngine::stop_callback() -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::stop_callback() -> void {
     m_engine.stop_search();
     chessuci::bestmove_info move_info{.bestmove = chessuci::UCIMove{m_engine.best_move()}};
     m_handler.send_bestmove(move_info);
 }
 
-auto UCIEngine::ponder_hit_callback() -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::ponder_hit_callback() -> void {
     // TODO
 }
 
-auto UCIEngine::quit_callback() -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::quit_callback() -> void {
     m_handler.stop();
     m_quit_signal.notify_one();
 }
 
-auto UCIEngine::display_board() -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::display_board() -> void {
     m_handler.send_raw(position_to_string(m_engine.position()));
 }
 
-auto UCIEngine::unknown_command_handler(const chessuci::TokenList &tokens) -> void {
+template<typename EngineT>
+auto UCIEngine<EngineT>::unknown_command_handler(const chessuci::TokenList &tokens) -> void {
     m_handler.send_raw("unknown command " + tokens[0]);
 }
 
