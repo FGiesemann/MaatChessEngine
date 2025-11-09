@@ -29,16 +29,16 @@ auto setup_test(const std::string &start_pos, const std::vector<UCIMove> &uci_mo
     test_case.position_commands.emplace_back(start_pos, std::vector<UCIMove>{});
     test_case.positions.push_back(position);
 
-    for (auto current_move_it = uci_moves.begin(); current_move_it != uci_moves.end(); ++current_move_it) {
-        test_case.uci_moves.push_back(*current_move_it);
-        const auto opt_move = convert_move(*current_move_it, position);
+    for (const auto &current_move : uci_moves) {
+        test_case.uci_moves.push_back(current_move);
+        const auto opt_move = convert_move(current_move, position);
         if (!opt_move.has_value()) {
-            throw std::runtime_error("Invalid move " + to_string(*current_move_it));
+            throw std::runtime_error("Invalid move " + to_string(current_move));
         }
         position.make_move(*opt_move);
         test_case.moves.push_back(*opt_move);
         test_case.positions.push_back(position);
-        collected_moves.push_back(*current_move_it);
+        collected_moves.push_back(current_move);
         test_case.position_commands.emplace_back(start_pos, collected_moves);
     }
     return test_case;
