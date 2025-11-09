@@ -1,7 +1,7 @@
 add_executable(chessengine_tests
   src/evaluation_test.cpp
   src/score_test.cpp
-  src/uci_engine_test.cpp
+  src/uci_engine_position_cb_test.cpp
 )
 add_compiler_warnings(chessengine_tests)
 
