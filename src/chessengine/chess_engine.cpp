@@ -14,6 +14,10 @@ const std::string ChessEngine::identifier = "Maat v0.1";
 const std::string ChessEngine::author = "Florian Giesemann";
 
 auto ChessEngine::search() const -> EvaluatedMove {
+    if (m_search_running.exchange(true)) {
+        // a search is already running
+        return {};
+    }
     Evaluator evaluator{m_config.evaluator_config};
     MoveOrdering move_ordering{m_config.evaluator_config};
     MinimaxSearch minimax{m_config.minimax_config, evaluator, move_ordering};
@@ -40,6 +44,7 @@ auto ChessEngine::search() const -> EvaluatedMove {
         current_depth += Depth::Step;
     }
 
+    m_search_running = false;
     return current_best_move;
 }
 
