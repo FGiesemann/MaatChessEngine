@@ -24,7 +24,6 @@ auto ChessEngine::search() const -> EvaluatedMove {
         // TODO: feed in the best move from the previous iteration to search first...
         auto best_move = minimax.best_move(m_position, current_depth);
         {
-            // TODO: Maybe not a good idea to have a mutex lock inside the search loop...
             std::lock_guard<std::mutex> lock{m_stats_mutex};
             m_search_stats = minimax.search_stats();
         }
