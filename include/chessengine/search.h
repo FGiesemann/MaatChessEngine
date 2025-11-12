@@ -10,14 +10,21 @@
 
 #include "chessengine/config.h"
 
+#include <atomic>
+
 namespace chessengine {
 
 /**
  * \brief Statistics of the last search.
  */
 struct SearchStats {
-    std::uint64_t nodes{0};   ///< Number of noes evaluated during search.
-    std::uint64_t cutoffs{0}; ///< Number of branches cut off during search.
+    std::atomic<std::uint64_t> nodes{0};   ///< Number of noes evaluated during search.
+    std::atomic<std::uint64_t> cutoffs{0}; ///< Number of branches cut off during search.
+
+    SearchStats() = default;
+    SearchStats(const SearchStats &other);
+    auto operator=(const SearchStats &rhs) -> SearchStats &;
+    ~SearchStats() = default;
 };
 
 /**
