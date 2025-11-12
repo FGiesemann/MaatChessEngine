@@ -129,13 +129,13 @@ public:
      */
     auto load_config(const std::filesystem::path &filename) -> void;
 private:
-    Config m_config{};                         ///< The engine configuration (search, evaluation, ...)
-    chesscore::Position m_position;            ///< The current position.
-    bool m_debugging{false};                   ///< Debugging mode.
-    std::thread m_search_thread{};             ///< Thread for the search.
-    std::atomic<bool> m_search_running{false}; ///< If a search is running.
-    mutable SearchStats m_search_stats;        ///< Statistics of the last search.
-    mutable std::mutex m_stats_mutex;          ///< Mutex protecting access to the search statistics.
+    Config m_config{};                                 ///< The engine configuration (search, evaluation, ...)
+    chesscore::Position m_position;                    ///< The current position.
+    bool m_debugging{false};                           ///< Debugging mode.
+    std::thread m_search_thread{};                     ///< Thread for the search.
+    mutable std::atomic<bool> m_search_running{false}; ///< If a search is running.
+    mutable SearchStats m_search_stats;                ///< Statistics of the last search.
+    mutable std::mutex m_stats_mutex;                  ///< Mutex protecting access to the search statistics.
 };
 
 } // namespace chessengine
