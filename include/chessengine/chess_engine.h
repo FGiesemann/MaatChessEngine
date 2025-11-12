@@ -8,11 +8,13 @@
 
 #include <atomic>
 #include <filesystem>
+#include <mutex>
 #include <thread>
 
 #include <chesscore/position.h>
 
 #include "chessengine/config.h"
+#include "chessengine/search.h"
 
 namespace chessengine {
 
@@ -20,6 +22,24 @@ class ChessEngine {
 public:
     static const std::string identifier; ///< Name an version of the engine.
     static const std::string author;     ///< Author of the engine.
+
+    /**
+     * \brief Search the stored position for the best move.
+     *
+     * Searches the currently set position for the best move, using the
+     * parameters from the stored configuration. This is a blocking call! If you
+     * want to start a search in the background, use start_search().
+     * \return The move found by the search.
+     */
+    auto search() const -> EvaluatedMove;
+
+    /**
+     * \brief Retrieve statistics from the last or a running searrch.
+     *
+     * Statistics are updated during a running search.
+     * \return Statistics of the last search.
+     */
+    auto search_stats() const -> SearchStats;
 
     /**
      * \brief Reset internal state in preparation for a new game.
@@ -114,6 +134,8 @@ private:
     bool m_debugging{false};                   ///< Debugging mode.
     std::thread m_search_thread{};             ///< Thread for the search.
     std::atomic<bool> m_search_running{false}; ///< If a search is running.
+    mutable SearchStats m_search_stats;        ///< Statistics of the last search.
+    mutable std::mutex m_stats_mutex;          ///< Mutex protecting access to the search statistics.
 };
 
 } // namespace chessengine

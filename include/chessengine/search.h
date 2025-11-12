@@ -20,17 +20,6 @@ struct SearchStats {
     std::uint64_t cutoffs{0}; ///< Number of branches cut off during search.
 };
 
-class Search {
-public:
-    Search(const Config &config);
-    auto best_move(const chesscore::Position &position) const -> EvaluatedMove;
-
-    auto search_stats() const -> const SearchStats & { return m_search_stats; }
-private:
-    Config m_config;
-    mutable SearchStats m_search_stats;
-};
-
 /**
  * \brief Comparison of moves for move ordering.
  *

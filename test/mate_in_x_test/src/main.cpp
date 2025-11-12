@@ -6,6 +6,7 @@
 #include <chesscore/epd.h>
 #include <chessgame/san.h>
 
+#include "chessengine/chess_engine.h"
 #include "chessengine/search.h"
 
 struct TestResult {
@@ -91,9 +92,11 @@ auto perform_test(const chesscore::EpdRecord &test, const chessengine::Config &c
 
     chessengine::Config test_config{config};
     test_config.search_config.max_depth = chessengine::Depth{test_result.expected_depth + chessengine::Depth::Step};
-    chessengine::Search search{config};
-    const auto result = search.best_move(test.position);
-    test_result.search_stats = search.search_stats();
+    chessengine::ChessEngine engine{};
+    engine.set_config(test_config);
+    engine.set_position(test.position);
+    const auto result = engine.search();
+    test_result.search_stats = engine.search_stats();
     test_result.found_move = result.move;
     if (is_winning_score(result.score)) {
         test_result.found_mate = true;
