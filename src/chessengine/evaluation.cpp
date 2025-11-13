@@ -14,6 +14,10 @@ auto Evaluator::evaluate(const chesscore::Position &position, chesscore::Color c
     return countup_material(position, color) - countup_material(position, chesscore::other_color(color)) + evaluate_pieces_on_squares(position, color);
 }
 
+auto Evaluator::evaluate(const chesscore::Move &move) const -> Score {
+    return get_capture_score(move) + get_promotion_score(move) + get_piece_movement_score(move);
+}
+
 auto Evaluator::is_mate(const chesscore::Position &position) -> bool {
     return position.check_state() == chesscore::CheckState::Checkmate;
 }
@@ -37,6 +41,24 @@ auto Evaluator::evaluate_pieces_on_squares(const chesscore::Position &position, 
         square += 1;
     }
     return score;
+}
+
+auto Evaluator::get_capture_score(const chesscore::Move &move) const -> Score {
+    if (move.is_capture()) {
+        return m_config.piece_value(move.captured.value().type) - m_config.piece_value(move.piece.type);
+    }
+    return Score{0};
+}
+
+auto Evaluator::get_promotion_score(const chesscore::Move &move) const -> Score {
+    if (move.is_pawn_promotion()) {
+        return m_config.pawn_promotion_score + m_config.piece_value(move.promoted.value().type) - m_config.piece_value(chesscore::PieceType::Pawn);
+    }
+    return Score{0};
+}
+
+auto Evaluator::get_piece_movement_score(const chesscore::Move &move) const -> Score {
+    return m_config.piece_on_square_value(move.piece, move.to) - m_config.piece_on_square_value(move.piece, move.from);
 }
 
 } // namespace chessengine
