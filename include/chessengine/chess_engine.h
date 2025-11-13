@@ -154,6 +154,8 @@ private:
     std::mutex m_stats_mutex;                         ///< Mutex protecting access to the search statistics.
     chesscore::Color m_color_to_evaluate{};           ///< The player from who's perspective to evaluate the position.
 
+    static constexpr std::uint64_t stop_check_interval{1000};
+
     auto search_position(Depth depth) -> EvaluatedMove;
     auto search_position(Depth depth, Bounds bounds, bool maximizing_player) -> Score;
     auto moves_to_search() const -> chesscore::MoveList;
