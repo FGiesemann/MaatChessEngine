@@ -44,7 +44,7 @@ public:
      * thread-safe!
      * \return Statistics of the last search.
      */
-    auto search_stats() const -> SearchStats;
+    auto search_stats() const -> const SearchStats &;
 
     /**
      * \brief Reset internal state in preparation for a new game.
@@ -154,7 +154,7 @@ private:
     chesscore::Color m_color_to_evaluate{};           ///< The player from who's perspective to evaluate the position.
 
     auto search_position(Depth depth) -> EvaluatedMove;
-    auto search_position(Depth depth, Score alpha, Score beta, bool maximizing_player) -> Score;
+    auto search_position(Depth depth, Bounds bounds, bool maximizing_player) -> Score;
     auto moves_to_search() const -> chesscore::MoveList;
 
     auto sort_moves(chesscore::MoveList &moves) const -> void;
