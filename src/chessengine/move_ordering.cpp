@@ -3,17 +3,9 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
-#include "chessengine/search.h"
+#include "chessengine/move_ordering.h"
 
 namespace chessengine {
-
-SearchStats::SearchStats(const SearchStats &other) : nodes{other.nodes.load()}, cutoffs{other.cutoffs.load()} {}
-
-auto SearchStats::operator=(const SearchStats &rhs) -> SearchStats & {
-    nodes = rhs.nodes.load();
-    cutoffs = rhs.cutoffs.load();
-    return *this;
-}
 
 auto MoveOrdering::operator()(const chesscore::Move &lhs, const chesscore::Move &rhs) const -> bool {
     Score lhs_score = evaluate_move(lhs);

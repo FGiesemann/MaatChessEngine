@@ -2,7 +2,8 @@ add_library(ChessEngineLib
     chessengine/chess_engine.cpp
     chessengine/config.cpp
     chessengine/evaluation.cpp
-    chessengine/search.cpp
+    chessengine/move_ordering.cpp
+    chessengine/search_stats.cpp
     chessengine/test_engine.cpp
     chessengine/types.cpp
     chessengine/uci_engine.cpp

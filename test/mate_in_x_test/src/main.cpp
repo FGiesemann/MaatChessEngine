@@ -7,7 +7,7 @@
 #include <chessgame/san.h>
 
 #include "chessengine/chess_engine.h"
-#include "chessengine/search.h"
+#include "chessengine/search_stats.h"
 
 struct TestResult {
     bool found_mate{false};

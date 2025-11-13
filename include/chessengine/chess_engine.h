@@ -15,7 +15,8 @@
 
 #include "chessengine/config.h"
 #include "chessengine/evaluation.h"
-#include "chessengine/search.h"
+#include "chessengine/move_ordering.h"
+#include "chessengine/search_stats.h"
 
 namespace chessengine {
 
