@@ -63,7 +63,7 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
 
 auto ChessEngine::search_position(Depth depth, Bounds bounds, bool maximizing_player) -> Score {
     m_search_stats.nodes += 1;
-    if (depth == Depth::Zero) {
+    if ((depth == Depth::Zero) || ((m_search_stats.nodes % stop_check_interval == 0) && should_stop())) {
         return m_evaluator.evaluate(m_position, m_color_to_evaluate);
     }
     const auto moves = moves_to_search();
