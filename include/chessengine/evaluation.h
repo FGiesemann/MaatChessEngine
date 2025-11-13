@@ -24,7 +24,7 @@ public:
      * Evaluates a given position from the perspective of the given player.
      * \param position The position to evaluate.
      * \param color The player whose perspective is used for evaluation.
-     * \return
+     * \return The position's score.
      */
     auto evaluate(const chesscore::Position &position, chesscore::Color color) const -> Score;
 
