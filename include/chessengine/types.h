@@ -67,6 +67,14 @@ struct [[nodiscard]] Score : public StrongType<std::int16_t, struct ScoreTag> {
 };
 
 /**
+ * \brief Bounds for evaluation during alpha-beta-search.
+ */
+struct Bounds {
+    Score alpha{Score::NegInfinity}; ///< α bound
+    Score beta{Score::Infinity};     ///< β bound
+};
+
+/**
  * \brief A search depth or a number of steps.
  *
  */

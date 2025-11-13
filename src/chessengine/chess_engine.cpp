@@ -45,7 +45,7 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
     const auto moves = moves_to_search();
     for (const auto &move : moves) {
         m_position.make_move(move);
-        auto value = search_position(depth - Depth::Step, Score::NegInfinity, Score::Infinity, false);
+        auto value = search_position(depth - Depth::Step, Bounds{}, false);
         if (is_winning_score(value)) {
             value = value - Depth::Step;
         } else if (is_losing_score(value)) {
@@ -61,7 +61,7 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
     return {.move = best_move, .score = best_value};
 }
 
-auto ChessEngine::search_position(Depth depth, Score alpha, Score beta, bool maximizing_player) -> Score {
+auto ChessEngine::search_position(Depth depth, Bounds bounds, bool maximizing_player) -> Score {
     m_search_stats.nodes += 1;
     if (depth == Depth::Zero) {
         return m_evaluator.evaluate(m_position, m_color_to_evaluate);
@@ -75,7 +75,7 @@ auto ChessEngine::search_position(Depth depth, Score alpha, Score beta, bool max
         auto best_value = Score::NegInfinity;
         for (const auto &move : moves) {
             m_position.make_move(move);
-            auto value = search_position(depth - Depth::Step, alpha, beta, false);
+            auto value = search_position(depth - Depth::Step, bounds, false);
             if (is_winning_score(value)) {
                 value = value - Depth::Step;
             } else if (is_losing_score(value)) {
@@ -83,8 +83,8 @@ auto ChessEngine::search_position(Depth depth, Score alpha, Score beta, bool max
             }
             best_value = std::max(best_value, value);
             m_position.unmake_move(move);
-            alpha = std::max(alpha, best_value);
-            if (m_config.minimax_config.use_alpha_beta_pruning && (beta <= alpha)) {
+            bounds.alpha = std::max(bounds.alpha, best_value);
+            if (m_config.minimax_config.use_alpha_beta_pruning && (bounds.beta <= bounds.alpha)) {
                 m_search_stats.cutoffs += 1;
                 break;
             }
@@ -94,7 +94,7 @@ auto ChessEngine::search_position(Depth depth, Score alpha, Score beta, bool max
         auto best_value = Score::Infinity;
         for (const auto &move : moves) {
             m_position.make_move(move);
-            auto value = search_position(depth - Depth::Step, alpha, beta, true);
+            auto value = search_position(depth - Depth::Step, bounds, true);
             if (is_winning_score(value)) {
                 value = value - Depth::Step;
             } else if (is_losing_score(value)) {
@@ -102,8 +102,8 @@ auto ChessEngine::search_position(Depth depth, Score alpha, Score beta, bool max
             }
             best_value = std::min(best_value, value);
             m_position.unmake_move(move);
-            beta = std::min(beta, best_value);
-            if (m_config.minimax_config.use_alpha_beta_pruning && (beta <= alpha)) {
+            bounds.beta = std::min(bounds.beta, best_value);
+            if (m_config.minimax_config.use_alpha_beta_pruning && (bounds.beta <= bounds.alpha)) {
                 m_search_stats.cutoffs += 1;
                 break;
             }
@@ -125,7 +125,7 @@ auto ChessEngine::sort_moves(chesscore::MoveList &moves) const -> void {
     std::ranges::sort(moves, [this](const chesscore::Move &lhs, const chesscore::Move &rhs) -> bool { return m_evaluator.evaluate(lhs) > m_evaluator.evaluate(rhs); });
 }
 
-auto ChessEngine::search_stats() const -> SearchStats {
+auto ChessEngine::search_stats() const -> const SearchStats & {
     return m_search_stats;
 }
 
