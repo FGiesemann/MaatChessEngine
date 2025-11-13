@@ -4,7 +4,6 @@
  * ************************************************************************** */
 
 #include "chessengine/search.h"
-#include "chessengine/minimax.h"
 
 namespace chessengine {
 
