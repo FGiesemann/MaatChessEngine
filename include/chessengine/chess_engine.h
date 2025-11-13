@@ -14,6 +14,7 @@
 #include <chesscore/position.h>
 
 #include "chessengine/config.h"
+#include "chessengine/evaluation.h"
 #include "chessengine/search.h"
 
 namespace chessengine {
@@ -23,6 +24,9 @@ public:
     static const std::string identifier; ///< Name an version of the engine.
     static const std::string author;     ///< Author of the engine.
 
+    ChessEngine() = default;
+    explicit ChessEngine(const Config &config);
+
     /**
      * \brief Search the stored position for the best move.
      *
@@ -31,12 +35,13 @@ public:
      * want to start a search in the background, use start_search().
      * \return The move found by the search.
      */
-    auto search() const -> EvaluatedMove;
+    auto search() -> EvaluatedMove;
 
     /**
-     * \brief Retrieve statistics from the last or a running searrch.
+     * \brief Retrieve statistics from the last searrch.
      *
-     * Statistics are updated during a running search.
+     * This function should only be called after a search. It is not
+     * thread-safe!
      * \return Statistics of the last search.
      */
     auto search_stats() const -> SearchStats;
@@ -128,14 +133,30 @@ public:
      * \param filename The config file.
      */
     auto load_config(const std::filesystem::path &filename) -> void;
+
+    /**
+     * \brief Checks, if a running search should be stopped.
+     *
+     * There might be different reasons why a search should stop as soon as
+     * possible. These include a request by the user or timing constraints.
+     * \return If the search should be terminated as soon as possible.
+     */
+    auto should_stop() const -> bool;
 private:
-    Config m_config{};                                 ///< The engine configuration (search, evaluation, ...)
-    chesscore::Position m_position;                    ///< The current position.
-    bool m_debugging{false};                           ///< Debugging mode.
-    std::thread m_search_thread{};                     ///< Thread for the search.
-    mutable std::atomic<bool> m_search_running{false}; ///< If a search is running.
-    mutable SearchStats m_search_stats;                ///< Statistics of the last search.
-    mutable std::mutex m_stats_mutex;                  ///< Mutex protecting access to the search statistics.
+    Config m_config{};                                       ///< The engine configuration (search, evaluation, ...)
+    MoveOrdering m_move_ordering{m_config.evaluator_config}; ///< The move ordering to use.
+    Evaluator m_evaluator{m_config.evaluator_config};        ///< Evaluation of positions.
+    chesscore::Position m_position;                          ///< The current position.
+    bool m_debugging{false};                                 ///< Debugging mode.
+    std::atomic<bool> m_search_running{false};               ///< If a search is running.
+    std::thread m_search_thread{};                           ///< Thread for the search.
+    SearchStats m_search_stats{};                            ///< Statistics of the last search.
+    std::mutex m_stats_mutex;                                ///< Mutex protecting access to the search statistics.
+    chesscore::Color m_color_to_evaluate{};                  ///< The player from who's perspective to evaluate the position.
+
+    auto search_position(Depth depth) -> EvaluatedMove;
+    auto search_position(Depth depth, Score alpha, Score beta, bool maximizing_player) -> Score;
+    auto moves_to_search() const -> chesscore::MoveList;
 };
 
 } // namespace chessengine

@@ -2,7 +2,6 @@ add_library(ChessEngineLib
     chessengine/chess_engine.cpp
     chessengine/config.cpp
     chessengine/evaluation.cpp
-    chessengine/minimax.cpp
     chessengine/search.cpp
     chessengine/test_engine.cpp
     chessengine/types.cpp
