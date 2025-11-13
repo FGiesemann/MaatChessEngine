@@ -148,6 +148,7 @@ private:
     chesscore::Position m_position;                   ///< The current position.
     bool m_debugging{false};                          ///< Debugging mode.
     std::atomic<bool> m_search_running{false};        ///< If a search is running.
+    std::atomic<bool> m_stop_requested{false};        ///< If the search should be stopped.
     std::thread m_search_thread{};                    ///< Thread for the search.
     SearchStats m_search_stats{};                     ///< Statistics of the last search.
     std::mutex m_stats_mutex;                         ///< Mutex protecting access to the search statistics.

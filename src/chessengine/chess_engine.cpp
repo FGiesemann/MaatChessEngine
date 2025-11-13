@@ -135,10 +135,11 @@ auto ChessEngine::new_game() -> void {
 
 auto ChessEngine::start_search() -> void {
     // TODO
+    m_stop_requested = false;
 }
 
 auto ChessEngine::stop_search() -> void {
-    // stop search thread
+    m_stop_requested = true;
 }
 
 auto ChessEngine::best_move() const -> chesscore::Move {
@@ -163,7 +164,7 @@ auto ChessEngine::load_config(const std::filesystem::path &filename) -> void {
 }
 
 auto ChessEngine::should_stop() const -> bool {
-    return false;
+    return m_stop_requested;
 }
 
 } // namespace chessengine
