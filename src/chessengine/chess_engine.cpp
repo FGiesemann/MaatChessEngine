@@ -28,9 +28,6 @@ auto ChessEngine::search() -> EvaluatedMove {
         if (best_move.score > current_best_move.score) {
             current_best_move = best_move;
         }
-        if (!m_config.search_config.iterative_deepening) {
-            break;
-        }
         current_depth += Depth::Step;
     }
 
