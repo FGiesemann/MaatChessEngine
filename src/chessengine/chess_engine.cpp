@@ -117,9 +117,13 @@ auto ChessEngine::moves_to_search() const -> chesscore::MoveList {
     auto moves = m_position.all_legal_moves();
     // TODO: feed in the best move from the previous iteration to search first...
     if (m_config.minimax_config.use_move_ordering) {
-        sort_moves(moves, m_move_ordering);
+        sort_moves(moves);
     }
     return moves;
+}
+
+auto ChessEngine::sort_moves(chesscore::MoveList &moves) const -> void {
+    std::ranges::sort(moves, [this](const chesscore::Move &lhs, const chesscore::Move &rhs) -> bool { return m_evaluator.evaluate(lhs) > m_evaluator.evaluate(rhs); });
 }
 
 auto ChessEngine::search_stats() const -> SearchStats {

@@ -15,7 +15,6 @@
 
 #include "chessengine/config.h"
 #include "chessengine/evaluation.h"
-#include "chessengine/move_ordering.h"
 #include "chessengine/search_stats.h"
 
 namespace chessengine {
@@ -144,20 +143,21 @@ public:
      */
     auto should_stop() const -> bool;
 private:
-    Config m_config{};                                       ///< The engine configuration (search, evaluation, ...)
-    MoveOrdering m_move_ordering{m_config.evaluator_config}; ///< The move ordering to use.
-    Evaluator m_evaluator{m_config.evaluator_config};        ///< Evaluation of positions.
-    chesscore::Position m_position;                          ///< The current position.
-    bool m_debugging{false};                                 ///< Debugging mode.
-    std::atomic<bool> m_search_running{false};               ///< If a search is running.
-    std::thread m_search_thread{};                           ///< Thread for the search.
-    SearchStats m_search_stats{};                            ///< Statistics of the last search.
-    std::mutex m_stats_mutex;                                ///< Mutex protecting access to the search statistics.
-    chesscore::Color m_color_to_evaluate{};                  ///< The player from who's perspective to evaluate the position.
+    Config m_config{};                                ///< The engine configuration (search, evaluation, ...)
+    Evaluator m_evaluator{m_config.evaluator_config}; ///< Evaluation of positions.
+    chesscore::Position m_position;                   ///< The current position.
+    bool m_debugging{false};                          ///< Debugging mode.
+    std::atomic<bool> m_search_running{false};        ///< If a search is running.
+    std::thread m_search_thread{};                    ///< Thread for the search.
+    SearchStats m_search_stats{};                     ///< Statistics of the last search.
+    std::mutex m_stats_mutex;                         ///< Mutex protecting access to the search statistics.
+    chesscore::Color m_color_to_evaluate{};           ///< The player from who's perspective to evaluate the position.
 
     auto search_position(Depth depth) -> EvaluatedMove;
     auto search_position(Depth depth, Score alpha, Score beta, bool maximizing_player) -> Score;
     auto moves_to_search() const -> chesscore::MoveList;
+
+    auto sort_moves(chesscore::MoveList &moves) const -> void;
 };
 
 } // namespace chessengine
