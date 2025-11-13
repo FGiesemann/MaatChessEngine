@@ -7,8 +7,8 @@
 
 namespace chessengine {
 
-const std::string ChessEngine::identifier = "Maat v0.1";
-const std::string ChessEngine::author = "Florian Giesemann";
+const char ChessEngine::identifier[] = "Maat v0.1";
+const char ChessEngine::author[] = "Florian Giesemann";
 
 auto ChessEngine::search() -> EvaluatedMove {
     if (m_search_running.exchange(true)) {
