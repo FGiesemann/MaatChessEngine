@@ -10,6 +10,8 @@ namespace chessengine {
 const char ChessEngine::identifier[] = "Maat v0.1";
 const char ChessEngine::author[] = "Florian Giesemann";
 
+ChessEngine::ChessEngine(const Config &config) : m_config{config}, m_evaluator{config.evaluator_config} {}
+
 auto ChessEngine::search() -> EvaluatedMove {
     if (m_search_running.exchange(true)) {
         // a search is already running
