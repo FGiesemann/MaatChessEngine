@@ -21,8 +21,8 @@ namespace chessengine {
 
 class ChessEngine {
 public:
-    static const std::string identifier; ///< Name an version of the engine.
-    static const std::string author;     ///< Author of the engine.
+    static const char identifier[]; ///< Name an version of the engine.
+    static const char author[];     ///< Author of the engine.
 
     ChessEngine() = default;
     explicit ChessEngine(const Config &config);
