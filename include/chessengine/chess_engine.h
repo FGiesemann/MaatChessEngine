@@ -113,7 +113,7 @@ public:
      * Should not be called during a search, as it is not thread safe.
      * \return Best move found.
      */
-    auto best_move() const -> chesscore::Move;
+    auto best_move() const -> EvaluatedMove { return m_best_move; }
 
     /**
      * \brief Set the configuration.
@@ -153,6 +153,7 @@ private:
     SearchStats m_search_stats{};                     ///< Statistics of the last search.
     std::mutex m_stats_mutex;                         ///< Mutex protecting access to the search statistics.
     chesscore::Color m_color_to_evaluate{};           ///< The player from who's perspective to evaluate the position.
+    EvaluatedMove m_best_move{};                      ///< The best move found so far.
 
     static constexpr std::uint64_t stop_check_interval{1000};
 
