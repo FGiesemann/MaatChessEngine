@@ -24,7 +24,6 @@ struct MinimaxConfig {
  * \brief Configuration parameters for the search strategy.
  */
 struct SearchConfig {
-    Depth max_depth{5};              ///< Maximum search depth.
     bool iterative_deepening{false}; ///< If iterative deepening should be used.
 };
 

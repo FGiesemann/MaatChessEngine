@@ -32,9 +32,10 @@ public:
      * Searches the currently set position for the best move, using the
      * parameters from the stored configuration. This is a blocking call! If you
      * want to start a search in the background, use start_search().
+     * \param max_depth Maximum search depth.
      * \return The move found by the search.
      */
-    auto search() -> EvaluatedMove;
+    auto search(Depth max_depth) -> EvaluatedMove;
 
     auto on_search_ended(SearchEndedCallback callback) -> void { m_search_ended_callback = std::move(callback); }
     auto on_search_progress(SearchProgressCalback callback) -> void { m_search_progress_callback = std::move(callback); }
