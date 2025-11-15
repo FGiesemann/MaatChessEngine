@@ -31,11 +31,14 @@ auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
         if (best_move.score > m_best_move.score) {
             m_best_move = best_move;
         }
-        m_search_stats.depth += Depth::Step;
         if (m_search_progress_callback) {
             m_search_stats.best_move = best_move;
             m_search_progress_callback(m_search_stats);
         }
+        if (m_search_stats.depth + Depth::Step > m_stopping_params.max_search_depth) {
+            break;
+        }
+        m_search_stats.depth += Depth::Step;
     }
 
     m_search_running = false;
@@ -51,7 +54,6 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
 
     chesscore::Move best_move{};
     auto best_value = Score::NegInfinity;
-    m_search_stats.nodes += 1;
     const auto moves = moves_to_search();
     for (const auto &move : moves) {
         m_position.make_move(move);
@@ -67,13 +69,14 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
             best_value = value;
         }
     }
+    m_search_stats.nodes += 1;
 
     return {.move = best_move, .score = best_value};
 }
 
 auto ChessEngine::search_position(Depth depth, Bounds bounds, bool maximizing_player) -> Score {
     m_search_stats.nodes += 1;
-    if ((depth == Depth::Zero) || ((m_search_stats.nodes % stop_check_interval == 0) && should_stop())) {
+    if ((depth == Depth::Zero) || should_stop()) {
         return m_evaluator.evaluate(m_position, m_color_to_evaluate);
     }
     const auto moves = moves_to_search();
