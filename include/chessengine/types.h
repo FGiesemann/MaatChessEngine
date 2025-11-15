@@ -115,6 +115,7 @@ struct [[nodiscard]] Depth : public StrongType<std::int16_t, struct DepthTag> {
 
     static const Depth Zero;         ///< Pre-defined zero depth.
     static const Depth Step;         ///< Pre-defines depth of one.
+    static const Depth Infinite;     ///< Very large depth, nearly infinite.
     static const Depth MaxMateDepth; ///< The maximum depth in the search for a mate.
 };
 

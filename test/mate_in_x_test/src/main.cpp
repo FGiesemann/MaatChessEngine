@@ -90,11 +90,11 @@ auto perform_test(const chesscore::EpdRecord &test, const chessengine::Config &c
     std::cout << '[' << test.id.value() << "] (" << std::setw(2) << test_result.expected_depth.value << ") ";
 
     chessengine::Config test_config{config};
-    const auto max_depth = chessengine::Depth{test_result.expected_depth + chessengine::Depth::Step};
     chessengine::ChessEngine engine{};
     engine.set_config(test_config);
     engine.set_position(test.position);
-    const auto result = engine.search(max_depth);
+    chessengine::StopParameters stop_params{.max_search_depth = chessengine::Depth{test_result.expected_depth + chessengine::Depth::Step}};
+    const auto result = engine.search(stop_params);
     test_result.search_stats = engine.search_stats();
     test_result.found_move = result.move;
     if (is_winning_score(result.score)) {

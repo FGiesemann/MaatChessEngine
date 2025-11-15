@@ -12,14 +12,17 @@ const char ChessEngine::author[] = "Florian Giesemann";
 
 ChessEngine::ChessEngine(const Config &config) : m_config{config}, m_evaluator{config.evaluator_config} {}
 
-auto ChessEngine::search(Depth max_depth) -> EvaluatedMove {
+auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
     if (m_search_running.exchange(true)) {
         // a search is already running
         return {};
     }
-    m_search_stats.depth = m_config.search_config.iterative_deepening ? Depth{1} : max_depth;
+    m_search_start = std::chrono::steady_clock::now();
+    m_stopping_params = stop_params;
+    // If iterative_deepening is not used, the max_search_depth should be set!
+    m_search_stats.depth = m_config.search_config.iterative_deepening ? Depth{1} : stop_params.max_search_depth;
     m_best_move = {};
-    while (!should_stop() && m_search_stats.depth <= max_depth) {
+    while (!should_stop()) {
         auto best_move = search_position(m_search_stats.depth);
         if (is_winning_score(best_move.score)) {
             m_best_move = best_move;
@@ -166,7 +169,20 @@ auto ChessEngine::load_config(const std::filesystem::path &filename) -> void {
 }
 
 auto ChessEngine::should_stop() const -> bool {
-    return m_stop_requested;
+    if (m_stop_requested) {
+        return true;
+    }
+    if (m_stopping_params.max_search_depth > Depth::Zero && m_search_stats.depth > m_stopping_params.max_search_depth) {
+        return true;
+    }
+    if (m_stopping_params.max_search_nodes > 0 && m_search_stats.nodes > m_stopping_params.max_search_nodes) {
+        return true;
+    }
+    if (m_stopping_params.max_search_time.count() > 0 && (m_search_stats.nodes % stop_check_interval == 0)) {
+        const auto search_duration = std::chrono::steady_clock::now() - m_search_start;
+        return search_duration > m_stopping_params.max_search_time;
+    }
+    return false;
 }
 
 } // namespace chessengine
