@@ -18,6 +18,12 @@
 
 namespace chessengine {
 
+struct StopParameters {
+    std::chrono::milliseconds max_search_time{0};
+    Depth max_search_depth = Depth::Zero;
+    std::uint64_t max_search_nodes{0};
+};
+
 class ChessEngine {
 public:
     static const char identifier[]; ///< Name an version of the engine.
@@ -32,10 +38,13 @@ public:
      * Searches the currently set position for the best move, using the
      * parameters from the stored configuration. This is a blocking call! If you
      * want to start a search in the background, use start_search().
-     * \param max_depth Maximum search depth.
+     * The arguments define the stopping criteria. Set any of those values to 0
+     * to disable it. If all are set to 0, the search can only be cancelled by
+     * setting the stop flag (see stop_search()).
+     * \param stop_params The parameters for the stopping criteria.
      * \return The move found by the search.
      */
-    auto search(Depth max_depth) -> EvaluatedMove;
+    auto search(const StopParameters &stop_params) -> EvaluatedMove;
 
     auto on_search_ended(SearchEndedCallback callback) -> void { m_search_ended_callback = std::move(callback); }
     auto on_search_progress(SearchProgressCalback callback) -> void { m_search_progress_callback = std::move(callback); }
@@ -136,6 +145,24 @@ public:
      * \param filename The config file.
      */
     auto load_config(const std::filesystem::path &filename) -> void;
+private:
+    Config m_config{};                                    ///< The engine configuration (search, evaluation, ...)
+    Evaluator m_evaluator{m_config.evaluator_config};     ///< Evaluation of positions.
+    chesscore::Position m_position;                       ///< The current position.
+    bool m_debugging{false};                              ///< Debugging mode.
+    std::atomic<bool> m_search_running{false};            ///< If a search is running.
+    std::atomic<bool> m_stop_requested{false};            ///< If the search should be stopped.
+    std::thread m_search_thread{};                        ///< Thread for the search.
+    SearchStats m_search_stats{};                         ///< Statistics of the last search.
+    std::mutex m_stats_mutex;                             ///< Mutex protecting access to the search statistics.
+    chesscore::Color m_color_to_evaluate{};               ///< The player from who's perspective to evaluate the position.
+    EvaluatedMove m_best_move{};                          ///< The best move found so far.
+    SearchEndedCallback m_search_ended_callback{};        ///< Callback for search end.
+    SearchProgressCalback m_search_progress_callback{};   ///< Callback for search progress.
+    StopParameters m_stopping_params{};                   ///< Parameters for the stopping criteria.
+    std::chrono::steady_clock::time_point m_search_start; ///< Start of the search.
+
+    static constexpr std::uint64_t stop_check_interval{1000};
 
     /**
      * \brief Checks, if a running search should be stopped.
@@ -145,22 +172,6 @@ public:
      * \return If the search should be terminated as soon as possible.
      */
     auto should_stop() const -> bool;
-private:
-    Config m_config{};                                  ///< The engine configuration (search, evaluation, ...)
-    Evaluator m_evaluator{m_config.evaluator_config};   ///< Evaluation of positions.
-    chesscore::Position m_position;                     ///< The current position.
-    bool m_debugging{false};                            ///< Debugging mode.
-    std::atomic<bool> m_search_running{false};          ///< If a search is running.
-    std::atomic<bool> m_stop_requested{false};          ///< If the search should be stopped.
-    std::thread m_search_thread{};                      ///< Thread for the search.
-    SearchStats m_search_stats{};                       ///< Statistics of the last search.
-    std::mutex m_stats_mutex;                           ///< Mutex protecting access to the search statistics.
-    chesscore::Color m_color_to_evaluate{};             ///< The player from who's perspective to evaluate the position.
-    EvaluatedMove m_best_move{};                        ///< The best move found so far.
-    SearchEndedCallback m_search_ended_callback{};      ///< Callback for search end.
-    SearchProgressCalback m_search_progress_callback{}; ///< Callback for search progress.
-
-    static constexpr std::uint64_t stop_check_interval{1000};
 
     auto search_position(Depth depth) -> EvaluatedMove;
     auto search_position(Depth depth, Bounds bounds, bool maximizing_player) -> Score;

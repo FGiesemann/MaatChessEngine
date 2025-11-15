@@ -148,6 +148,9 @@ private:
     std::condition_variable m_quit_signal;
     std::mutex m_quit_mutex;
 
+    static constexpr int sudden_death_moves{40};
+    static constexpr std::int64_t search_stop_buffer{50};
+
     auto register_callbacks() -> void {
         m_handler.on_uci([this]() -> void { uci_callback(); });
         m_handler.on_position([this](const chessuci::position_command &command) -> void { position_callback(command); });
@@ -158,6 +161,57 @@ private:
 
         m_engine.on_search_ended([this](const EvaluatedMove &move) -> void { engine_finished_search(move); });
         m_engine.on_search_progress([this](SearchStats search_stats) -> void { engine_search_progress(search_stats); });
+    }
+
+    auto is_white_to_move() -> bool { return m_engine.position().side_to_move() == chesscore::Color::White; }
+
+    /**
+     * \brief Compute the time for the next move.
+     *
+     * Handles time control for the next move from the parameters of the
+     * go-command. It handles movetime, wtime, btime, winc, binc, movestogo and
+     * also sudden death mode.
+     * Should only be used, if time control should actually be used!
+     * \param go_command The go command from the GUI.
+     * \return The allocated search time for the next move.
+     */
+    auto compute_target_movetime(const chessuci::go_command &go_command) -> std::chrono::milliseconds {
+        if (go_command.movetime.has_value()) {
+            return std::chrono::milliseconds{go_command.movetime.value()};
+        }
+        if (!go_command.wtime.has_value() && !go_command.btime.has_value()) {
+            // "Infinite" search, engine should be stopped explicitly
+            return std::chrono::milliseconds::max();
+        }
+
+        const long long time_left = is_white_to_move() ? go_command.wtime.value_or(0) : go_command.btime.value_or(0);
+        const long long increment = is_white_to_move() ? go_command.winc.value_or(0) : go_command.binc.value_or(0);
+
+        const int moves_to_go = go_command.movestogo.value_or(sudden_death_moves);
+
+        long long target_time_ms;
+
+        if (time_left > 0 && moves_to_go > 0) {
+            target_time_ms = time_left / moves_to_go;
+        } else {
+            target_time_ms = 0;
+        }
+
+        target_time_ms += (increment * 9) / 10;
+
+        if (time_left > 0) {
+            target_time_ms = std::min(target_time_ms, time_left / 2);
+        }
+
+        target_time_ms -= search_stop_buffer;
+
+        if (target_time_ms <= 0 && time_left > 0) {
+            target_time_ms = 1;
+        } else if (time_left <= 0) {
+            target_time_ms = 0;
+        }
+
+        return std::chrono::milliseconds(target_time_ms);
     }
 };
 
