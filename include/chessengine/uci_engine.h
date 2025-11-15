@@ -127,6 +127,15 @@ public:
         });
         return position;
     }
+
+    auto engine_finished_search(const EvaluatedMove &move) -> void {
+        chessuci::bestmove_info move_info{.bestmove = chessuci::UCIMove{move.move}, .pondermove = {}};
+        m_handler.send_bestmove(move_info);
+    }
+
+    auto engine_search_progress([[maybe_unused]] SearchStats search_stats) -> void {
+        // TODO: send some info messages
+    }
 private:
     chessuci::UCIEngineHandler m_handler;
     EngineT m_engine;
@@ -142,6 +151,9 @@ private:
 
         m_handler.register_command("d", [this](const chessuci::TokenList &) -> void { display_board(); });
         m_handler.on_unknown_command([this](const chessuci::TokenList &tokens) -> void { unknown_command_handler(tokens); });
+
+        m_engine.on_search_ended([this](const EvaluatedMove &move) -> void { engine_finished_search(move); });
+        m_engine.on_search_progress([this](SearchStats search_stats) -> void { engine_search_progress(search_stats); });
     }
 };
 

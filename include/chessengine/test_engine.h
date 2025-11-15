@@ -11,6 +11,8 @@
 #include <variant>
 #include <vector>
 
+#include "chessengine/types.h"
+
 #include <chesscore/position.h>
 
 namespace chessengine {
@@ -59,6 +61,8 @@ public:
 
     auto call_log() const -> const CallLog & { return m_call_log; }
     auto set_position_returns(const std::vector<chesscore::Position> &positions) -> void { set_queue(m_position_return_values, positions); }
+    auto on_search_ended(SearchEndedCallback) -> void {}
+    auto on_search_progress(SearchProgressCalback) -> void {}
 private:
     mutable CallLog m_call_log;
     mutable std::queue<chesscore::Position> m_position_return_values{};
