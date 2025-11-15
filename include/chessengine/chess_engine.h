@@ -8,6 +8,7 @@
 
 #include <atomic>
 #include <filesystem>
+#include <functional>
 #include <mutex>
 #include <thread>
 
@@ -24,6 +25,9 @@ public:
     static const char identifier[]; ///< Name an version of the engine.
     static const char author[];     ///< Author of the engine.
 
+    using SearchEndedCallback = std::function<void(const EvaluatedMove &)>;
+    using SearchProgressCalback = std::function<void(SearchStats)>;
+
     ChessEngine() = default;
     explicit ChessEngine(const Config &config);
 
@@ -36,6 +40,9 @@ public:
      * \return The move found by the search.
      */
     auto search() -> EvaluatedMove;
+
+    auto on_search_ended(SearchEndedCallback callback) -> void { m_search_ended_callback = std::move(callback); }
+    auto on_search_progress(SearchProgressCalback callback) -> void { m_search_progress_callback = std::move(callback); }
 
     /**
      * \brief Retrieve statistics from the last searrch.
@@ -143,17 +150,19 @@ public:
      */
     auto should_stop() const -> bool;
 private:
-    Config m_config{};                                ///< The engine configuration (search, evaluation, ...)
-    Evaluator m_evaluator{m_config.evaluator_config}; ///< Evaluation of positions.
-    chesscore::Position m_position;                   ///< The current position.
-    bool m_debugging{false};                          ///< Debugging mode.
-    std::atomic<bool> m_search_running{false};        ///< If a search is running.
-    std::atomic<bool> m_stop_requested{false};        ///< If the search should be stopped.
-    std::thread m_search_thread{};                    ///< Thread for the search.
-    SearchStats m_search_stats{};                     ///< Statistics of the last search.
-    std::mutex m_stats_mutex;                         ///< Mutex protecting access to the search statistics.
-    chesscore::Color m_color_to_evaluate{};           ///< The player from who's perspective to evaluate the position.
-    EvaluatedMove m_best_move{};                      ///< The best move found so far.
+    Config m_config{};                                  ///< The engine configuration (search, evaluation, ...)
+    Evaluator m_evaluator{m_config.evaluator_config};   ///< Evaluation of positions.
+    chesscore::Position m_position;                     ///< The current position.
+    bool m_debugging{false};                            ///< Debugging mode.
+    std::atomic<bool> m_search_running{false};          ///< If a search is running.
+    std::atomic<bool> m_stop_requested{false};          ///< If the search should be stopped.
+    std::thread m_search_thread{};                      ///< Thread for the search.
+    SearchStats m_search_stats{};                       ///< Statistics of the last search.
+    std::mutex m_stats_mutex;                           ///< Mutex protecting access to the search statistics.
+    chesscore::Color m_color_to_evaluate{};             ///< The player from who's perspective to evaluate the position.
+    EvaluatedMove m_best_move{};                        ///< The best move found so far.
+    SearchEndedCallback m_search_ended_callback{};      ///< Callback for search end.
+    SearchProgressCalback m_search_progress_callback{}; ///< Callback for search progress.
 
     static constexpr std::uint64_t stop_check_interval{1000};
 
