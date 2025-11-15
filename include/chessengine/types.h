@@ -8,6 +8,7 @@
 
 #include <compare>
 #include <cstdint>
+#include <functional>
 
 #include <chesscore/move.h>
 
@@ -238,6 +239,17 @@ struct EvaluatedMove {
     chesscore::Move move;            ///< The move.
     Score score{Score::NegInfinity}; ///< Scor for the move.
 };
+
+/**
+ * \brief Statistics of the last search.
+ */
+struct SearchStats {
+    std::uint64_t nodes{0};   ///< Number of noes evaluated during search.
+    std::uint64_t cutoffs{0}; ///< Number of branches cut off during search.
+};
+
+using SearchEndedCallback = std::function<void(const EvaluatedMove &)>;
+using SearchProgressCalback = std::function<void(SearchStats)>;
 
 } // namespace chessengine
 

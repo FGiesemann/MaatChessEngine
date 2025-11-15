@@ -8,7 +8,6 @@
 
 #include <atomic>
 #include <filesystem>
-#include <functional>
 #include <mutex>
 #include <thread>
 
@@ -16,7 +15,6 @@
 
 #include "chessengine/config.h"
 #include "chessengine/evaluation.h"
-#include "chessengine/search_stats.h"
 
 namespace chessengine {
 
@@ -24,9 +22,6 @@ class ChessEngine {
 public:
     static const char identifier[]; ///< Name an version of the engine.
     static const char author[];     ///< Author of the engine.
-
-    using SearchEndedCallback = std::function<void(const EvaluatedMove &)>;
-    using SearchProgressCalback = std::function<void(SearchStats)>;
 
     ChessEngine() = default;
     explicit ChessEngine(const Config &config);
