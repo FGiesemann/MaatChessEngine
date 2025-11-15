@@ -12,14 +12,14 @@ const char ChessEngine::author[] = "Florian Giesemann";
 
 ChessEngine::ChessEngine(const Config &config) : m_config{config}, m_evaluator{config.evaluator_config} {}
 
-auto ChessEngine::search() -> EvaluatedMove {
+auto ChessEngine::search(Depth max_depth) -> EvaluatedMove {
     if (m_search_running.exchange(true)) {
         // a search is already running
         return {};
     }
-    m_search_stats.depth = m_config.search_config.iterative_deepening ? Depth{1} : m_config.search_config.max_depth;
+    m_search_stats.depth = m_config.search_config.iterative_deepening ? Depth{1} : max_depth;
     m_best_move = {};
-    while (!should_stop() && m_search_stats.depth <= m_config.search_config.max_depth) {
+    while (!should_stop() && m_search_stats.depth <= max_depth) {
         auto best_move = search_position(m_search_stats.depth);
         if (is_winning_score(best_move.score)) {
             m_best_move = best_move;

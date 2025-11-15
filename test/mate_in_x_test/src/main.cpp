@@ -47,7 +47,7 @@ auto main(int argc, const char *argv[]) -> int {
         .minimax_config{
             .use_alpha_beta_pruning = true,
         },
-        .search_config{.max_depth = chessengine::Depth{4}, .iterative_deepening = true},
+        .search_config{.iterative_deepening = true},
         .evaluator_config{}
     };
 
@@ -90,11 +90,11 @@ auto perform_test(const chesscore::EpdRecord &test, const chessengine::Config &c
     std::cout << '[' << test.id.value() << "] (" << std::setw(2) << test_result.expected_depth.value << ") ";
 
     chessengine::Config test_config{config};
-    test_config.search_config.max_depth = chessengine::Depth{test_result.expected_depth + chessengine::Depth::Step};
+    const auto max_depth = chessengine::Depth{test_result.expected_depth + chessengine::Depth::Step};
     chessengine::ChessEngine engine{};
     engine.set_config(test_config);
     engine.set_position(test.position);
-    const auto result = engine.search();
+    const auto result = engine.search(max_depth);
     test_result.search_stats = engine.search_stats();
     test_result.found_move = result.move;
     if (is_winning_score(result.score)) {
