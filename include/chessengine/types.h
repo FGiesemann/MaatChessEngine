@@ -246,6 +246,8 @@ struct EvaluatedMove {
 struct SearchStats {
     std::uint64_t nodes{0};   ///< Number of noes evaluated during search.
     std::uint64_t cutoffs{0}; ///< Number of branches cut off during search.
+    EvaluatedMove best_move;  ///< Best move so far.
+    Depth depth;              ///< Depth reached so far.
 };
 
 using SearchEndedCallback = std::function<void(const EvaluatedMove &)>;

@@ -17,25 +17,25 @@ auto ChessEngine::search() -> EvaluatedMove {
         // a search is already running
         return {};
     }
-    Depth current_depth = m_config.search_config.iterative_deepening ? Depth{1} : m_config.search_config.max_depth;
-    EvaluatedMove current_best_move{};
-    while (!should_stop() && current_depth <= m_config.search_config.max_depth) {
-        auto best_move = search_position(current_depth);
+    m_search_stats.depth = m_config.search_config.iterative_deepening ? Depth{1} : m_config.search_config.max_depth;
+    m_best_move = {};
+    while (!should_stop() && m_search_stats.depth <= m_config.search_config.max_depth) {
+        auto best_move = search_position(m_search_stats.depth);
         if (is_winning_score(best_move.score)) {
-            current_best_move = best_move;
+            m_best_move = best_move;
             break;
         }
-        if (best_move.score > current_best_move.score) {
-            current_best_move = best_move;
+        if (best_move.score > m_best_move.score) {
+            m_best_move = best_move;
         }
-        current_depth += Depth::Step;
+        m_search_stats.depth += Depth::Step;
         if (m_search_progress_callback) {
+            m_search_stats.best_move = best_move;
             m_search_progress_callback(m_search_stats);
         }
     }
 
     m_search_running = false;
-    m_best_move = current_best_move;
     if (m_search_ended_callback) {
         m_search_ended_callback(m_best_move);
     }
