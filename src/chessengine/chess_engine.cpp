@@ -29,10 +29,16 @@ auto ChessEngine::search() -> EvaluatedMove {
             current_best_move = best_move;
         }
         current_depth += Depth::Step;
+        if (m_search_progress_callback) {
+            m_search_progress_callback(m_search_stats);
+        }
     }
 
     m_search_running = false;
     m_best_move = current_best_move;
+    if (m_search_ended_callback) {
+        m_search_ended_callback(m_best_move);
+    }
     return m_best_move;
 }
 
