@@ -32,7 +32,8 @@ auto ChessEngine::search() -> EvaluatedMove {
     }
 
     m_search_running = false;
-    return current_best_move;
+    m_best_move = current_best_move;
+    return m_best_move;
 }
 
 auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
@@ -140,11 +141,6 @@ auto ChessEngine::start_search() -> void {
 
 auto ChessEngine::stop_search() -> void {
     m_stop_requested = true;
-}
-
-auto ChessEngine::best_move() const -> chesscore::Move {
-    // TODO
-    return {};
 }
 
 auto ChessEngine::set_position(const chesscore::Position &position) -> void {
