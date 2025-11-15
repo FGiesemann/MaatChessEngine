@@ -133,8 +133,12 @@ public:
         m_handler.send_bestmove(move_info);
     }
 
-    auto engine_search_progress([[maybe_unused]] SearchStats search_stats) -> void {
-        // TODO: send some info messages
+    auto engine_search_progress(SearchStats search_stats) -> void {
+        chessuci::search_info info{};
+        info.currmove = chessuci::UCIMove{search_stats.best_move.move};
+        info.depth = search_stats.depth.value;
+        info.nodes = search_stats.nodes;
+        m_handler.send_info(info);
     }
 private:
     chessuci::UCIEngineHandler m_handler;
