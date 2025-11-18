@@ -56,21 +56,28 @@ public:
         std::unique_lock<std::mutex> lock{m_quit_mutex};
         m_quit_signal.wait(lock);
     }
+
     auto is_running() const -> bool { return m_handler.is_running(); }
 
     auto engine() const -> const EngineT & { return m_engine; }
+
     auto engine() -> EngineT & { return m_engine; }
 
     auto uci_callback() -> void {
         m_handler.send_id({.name = ChessEngine::identifier, .author = ChessEngine::author});
         m_handler.send_uciok();
     }
+
     auto debug_callback(bool debug_on) -> void { m_engine.set_debugging(debug_on); }
+
     auto is_ready_callback() -> void { m_handler.send_readyok(); }
+
     auto set_option_callback([[maybe_unused]] const chessuci::setoption_command &command) -> void {
         // currently no options
     }
+
     auto uci_new_game_callback() -> void { m_engine.new_game(); }
+
     auto position_callback(const chessuci::position_command &command) -> void {
         if (m_position_setup != command.fen) {
             m_engine.set_position(construct_position(command));
@@ -90,18 +97,26 @@ public:
             }
         }
     }
-    auto go_callback([[maybe_unused]] const chessuci::go_command &command) -> void {
-        // evaluate command parameters and start search
-        m_engine.start_search();
+
+    auto go_callback(const chessuci::go_command &command) -> void {
+        StopParameters stop_params;
+        stop_params.max_search_depth = Depth{command.depth.value_or(0)};
+        stop_params.max_search_nodes = command.nodes.value_or(0);
+        stop_params.max_search_time = compute_target_movetime(command);
+
+        m_engine.start_search(stop_params);
     }
+
     auto stop_callback() -> void {
         m_engine.stop_search();
         chessuci::bestmove_info move_info{.bestmove = chessuci::UCIMove{m_engine.best_move()}, .pondermove = {}};
         m_handler.send_bestmove(move_info);
     }
+
     auto ponder_hit_callback() -> void {
         // TODO
     }
+
     auto quit_callback() -> void {
         m_handler.stop();
         m_quit_signal.notify_one();
@@ -171,7 +186,8 @@ private:
      * Handles time control for the next move from the parameters of the
      * go-command. It handles movetime, wtime, btime, winc, binc, movestogo and
      * also sudden death mode.
-     * Should only be used, if time control should actually be used!
+     * If the go_command does not specify any time control, the maximum possible
+     * search time, which can be considered as "inifinite", is returned.
      * \param go_command The go command from the GUI.
      * \return The allocated search time for the next move.
      */
@@ -179,7 +195,7 @@ private:
         if (go_command.movetime.has_value()) {
             return std::chrono::milliseconds{go_command.movetime.value()};
         }
-        if (!go_command.wtime.has_value() && !go_command.btime.has_value()) {
+        if (!go_command.has_timing_control() || go_command.infinite) {
             // "Infinite" search, engine should be stopped explicitly
             return std::chrono::milliseconds::max();
         }
