@@ -12,11 +12,13 @@ const char ChessEngine::author[] = "Florian Giesemann";
 
 ChessEngine::ChessEngine(const Config &config) : m_config{config}, m_evaluator{config.evaluator_config} {}
 
-auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
-    if (m_search_running.exchange(true)) {
-        // a search is already running
-        return {};
+ChessEngine::~ChessEngine() {
+    if (m_search_thread.joinable()) {
+        m_search_thread.join();
     }
+}
+
+auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
     m_search_start = std::chrono::steady_clock::now();
     m_stopping_params = stop_params;
     // If iterative_deepening is not used, the max_search_depth should be set!
@@ -146,9 +148,16 @@ auto ChessEngine::new_game() -> void {
     m_position = chesscore::Position{chesscore::FenString::starting_position()};
 }
 
-auto ChessEngine::start_search() -> void {
-    // TODO
+auto ChessEngine::start_search(const StopParameters &stop_params) -> void {
+    if (m_search_running.exchange(true)) {
+        return;
+    }
+    // Cleanup previos search
+    if (m_search_thread.joinable()) {
+        m_search_thread.join();
+    }
     m_stop_requested = false;
+    m_search_thread = std::thread(&ChessEngine::search, this, stop_params);
 }
 
 auto ChessEngine::stop_search() -> void {

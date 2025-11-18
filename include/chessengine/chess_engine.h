@@ -25,9 +25,12 @@ namespace chessengine {
  * the search for a best move in a position.
  */
 struct StopParameters {
-    std::chrono::milliseconds max_search_time{0}; ///< Maximum allowed search time.
-    Depth max_search_depth = Depth::Zero;         ///< Maximum allowed search depth.
-    std::uint64_t max_search_nodes{0};            ///< Maximum number of nodes to evaluate.
+    /// Maximum allowed search time.
+    std::chrono::milliseconds max_search_time{std::chrono::milliseconds::max()};
+    /// Maximum allowed search depth. 0 means "no restriction"
+    Depth max_search_depth = Depth::Zero;
+    /// Maximum number of nodes to evaluate. 0 means "no restriction"
+    std::uint64_t max_search_nodes{0};
 };
 
 class ChessEngine {
@@ -37,6 +40,7 @@ public:
 
     ChessEngine() = default;
     explicit ChessEngine(const Config &config);
+    ~ChessEngine();
 
     /**
      * \brief Search the stored position for the best move.
@@ -105,8 +109,9 @@ public:
      *
      * The search starts on the position previously set by set_position or
      * reached by the last play_move call.
+     * \param stop_params The parameters for the stopping criteria.
      */
-    auto start_search(/* some options */) -> void;
+    auto start_search(const StopParameters &stop_params) -> void;
 
     /**
      * \brief Stops a running search.
