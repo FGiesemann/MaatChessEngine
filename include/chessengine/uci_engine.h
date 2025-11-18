@@ -100,7 +100,7 @@ public:
 
     auto go_callback(const chessuci::go_command &command) -> void {
         StopParameters stop_params;
-        stop_params.max_search_depth = Depth{command.depth.value_or(0)};
+        stop_params.max_search_depth = Depth{static_cast<Depth::value_type>(command.depth.value_or(0))};
         stop_params.max_search_nodes = command.nodes.value_or(0);
         stop_params.max_search_time = compute_target_movetime(command);
 
