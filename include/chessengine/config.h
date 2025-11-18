@@ -6,6 +6,7 @@
 #ifndef CHESSENGINE_CONFIG_H
 #define CHESSENGINE_CONFIG_H
 
+#include <array>
 #include <filesystem>
 
 #include "chessengine/types.h"
@@ -37,7 +38,7 @@ struct PieceSquareTable {
      * The values are indexed according to chesscore::Square::index, i.e., entry
      * `values[0]` is for square a1, `values[1]` for square b1, and so on.
      */
-    Score values[chesscore::Square::count];
+    std::array<Score, chesscore::Square::count> values;
 
     /**
      * \brief Get the value for a given square.
