@@ -12,7 +12,10 @@ target_include_directories(ChessEngineLib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(ChessEngineLib PUBLIC ChessGame::ChessGame ChessUCI::ChessUCI)
+target_link_libraries(ChessEngineLib PUBLIC
+    chesscore::chesscore
+    ChessUCI::ChessUCI
+)
 
 add_executable(maat
     app/main.cpp

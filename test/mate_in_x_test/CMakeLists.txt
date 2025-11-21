@@ -5,6 +5,7 @@ add_executable(mate_in_x_test
 target_link_libraries(mate_in_x_test
     PRIVATE
     ChessEngineLib
+    ChessGame::ChessGame
 )
 
 add_executable(lichess_converter
