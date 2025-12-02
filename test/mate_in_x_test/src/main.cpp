@@ -1,7 +1,9 @@
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <ranges>
+
 
 #include <chesscore/epd.h>
 #include <chessgame/san.h>
