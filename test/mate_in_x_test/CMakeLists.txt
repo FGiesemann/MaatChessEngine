@@ -18,3 +18,5 @@ target_link_libraries(lichess_converter
     ChessGame::ChessGame
     ChessUCI::ChessUCI
 )
+
+target_compile_features(lichess_converter PUBLIC cxx_std_23)
