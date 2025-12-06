@@ -18,6 +18,8 @@
 
 #include "chessengine/chess_engine.h"
 
+#include <iostream> // DELME
+
 namespace chessengine {
 
 namespace detail {
@@ -68,13 +70,17 @@ public:
     auto engine() -> EngineT & { return m_engine; }
 
     auto uci_callback() -> void {
+        std::cerr << "[UCIEngine] Received UCI. Sending info and uciok\n";
         m_handler.send_id({.name = ChessEngine::identifier, .author = ChessEngine::author});
         m_handler.send_uciok();
     }
 
     auto debug_callback(bool debug_on) -> void { m_engine.set_debugging(debug_on); }
 
-    auto is_ready_callback() -> void { m_handler.send_readyok(); }
+    auto is_ready_callback() -> void {
+        std::cerr << "[UCIEngine] Received isready. Sending readyok\n";
+        m_handler.send_readyok();
+    }
 
     auto set_option_callback([[maybe_unused]] const chessuci::setoption_command &command) -> void {
         // currently no options
@@ -83,6 +89,7 @@ public:
     auto uci_new_game_callback() -> void { m_engine.new_game(); }
 
     auto position_callback(const chessuci::position_command &command) -> void {
+        std::cerr << "[UCIEngine] Received position: " << command.startpos << '\n';
         if (m_position_setup != command.fen) {
             setup_position(command);
         } else {
@@ -93,6 +100,7 @@ public:
                     if (!matched_move.has_value()) {
                         throw chessuci::UCIError{"Invalid move " + to_string(move)};
                     }
+                    std::cerr << "[UCIEngine::position_callback] Playing move " << to_string(move) << '\n';
                     m_engine.play_move(matched_move.value());
                     m_move_list.push_back(move);
                 });
@@ -108,6 +116,8 @@ public:
         stop_params.max_search_nodes = command.nodes.value_or(0);
         stop_params.max_search_time = compute_target_movetime(command);
 
+        std::cerr << "[UCIEngine] Received go: depth = " << stop_params.max_search_depth.value << "; max search nodes = " << stop_params.max_search_nodes
+                  << "; time = " << stop_params.max_search_time.count() << " ms\n";
         m_engine.start_search(stop_params);
     }
 
