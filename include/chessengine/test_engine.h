@@ -52,9 +52,9 @@ public:
         return m_position;
     }
     auto play_move(const chesscore::Move &move) -> void { m_call_log.emplace_back(play_move_call{move}); }
-    auto start_search(/* some options */) -> void { m_call_log.emplace_back(start_search_call{}); }
+    auto start_search(const StopParameters &) -> void { m_call_log.emplace_back(start_search_call{}); }
     auto stop_search() -> void { m_call_log.emplace_back(stop_search_call{}); }
-    auto best_move() const -> chesscore::Move {
+    auto best_move() const -> EvaluatedMove {
         m_call_log.emplace_back(best_move_call{});
         return {};
     }
