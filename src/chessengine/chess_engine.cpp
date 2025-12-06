@@ -191,8 +191,9 @@ auto ChessEngine::should_stop() const -> bool {
         return true;
     }
     if (m_stopping_params.max_search_time.count() > 0 && (m_search_stats.nodes % stop_check_interval == 0)) {
-        const auto search_duration = std::chrono::steady_clock::now() - m_search_start;
-        return search_duration > m_stopping_params.max_search_time;
+        const auto search_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_search_start);
+        const auto time_exceeded = search_duration > m_stopping_params.max_search_time;
+        return time_exceeded;
     }
     return false;
 }
