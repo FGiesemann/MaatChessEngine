@@ -168,6 +168,7 @@ private:
 
     auto register_callbacks() -> void {
         m_handler.on_uci([this]() -> void { uci_callback(); });
+        m_handler.on_isready([this]() -> void { is_ready_callback(); });
         m_handler.on_position([this](const chessuci::position_command &command) -> void { position_callback(command); });
         m_handler.on_quit([this]() -> void { quit_callback(); });
 
