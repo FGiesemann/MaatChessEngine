@@ -124,6 +124,13 @@ public:
     auto best_move() const -> EvaluatedMove { return m_best_move; }
 
     /**
+     * \brief Get engine's current config.
+     *
+     * \return The current config.
+     */
+    auto config() -> const Config & { return m_config; }
+
+    /**
      * \brief Set the configuration.
      *
      * Allows to set the configuration of the engine. This includes search and

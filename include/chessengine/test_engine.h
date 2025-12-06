@@ -11,6 +11,7 @@
 #include <variant>
 #include <vector>
 
+#include "chessengine/config.h"
 #include "chessengine/types.h"
 
 #include <chesscore/position.h>
@@ -63,10 +64,14 @@ public:
     auto set_position_returns(const std::vector<chesscore::Position> &positions) -> void { set_queue(m_position_return_values, positions); }
     auto on_search_ended(SearchEndedCallback) -> void {}
     auto on_search_progress(SearchProgressCalback) -> void {}
+
+    auto config() -> const Config & { return m_config; }
+    auto set_config(const Config &config) -> void { m_config = config; }
 private:
     mutable CallLog m_call_log;
     mutable std::queue<chesscore::Position> m_position_return_values{};
     mutable chesscore::Position m_position;
+    mutable Config m_config;
 
     template<typename T>
     auto set_queue(std::queue<T> &queue, const std::vector<T> &values) -> void {

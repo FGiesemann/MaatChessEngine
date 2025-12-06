@@ -53,7 +53,12 @@ auto construct_position(const chessuci::position_command &command) -> std::pair<
 template<typename EngineT = ChessEngine>
 class UCIEngine {
 public:
-    explicit UCIEngine(std::istream &in_stream = std::cin, std::ostream &out_stream = std::cout) : m_handler{in_stream, out_stream} { register_callbacks(); }
+    explicit UCIEngine(std::istream &in_stream = std::cin, std::ostream &out_stream = std::cout) : m_handler{in_stream, out_stream} {
+        register_callbacks();
+        auto config = m_engine.config();
+        config.search_config.iterative_deepening = true;
+        m_engine.set_config(config);
+    }
 
     auto run() -> void {
         m_handler.start();
