@@ -18,21 +18,6 @@
 
 namespace chessengine {
 
-/**
- * \brief Parameters for stopping criteria of the search.
- *
- * Describes parameters that influence the stopping criteria evaluated during
- * the search for a best move in a position.
- */
-struct StopParameters {
-    /// Maximum allowed search time.
-    std::chrono::milliseconds max_search_time{std::chrono::milliseconds::max()};
-    /// Maximum allowed search depth. 0 means "no restriction"
-    Depth max_search_depth = Depth::Zero;
-    /// Maximum number of nodes to evaluate. 0 means "no restriction"
-    std::uint64_t max_search_nodes{0};
-};
-
 class ChessEngine {
 public:
     static const char identifier[]; ///< Name an version of the engine.

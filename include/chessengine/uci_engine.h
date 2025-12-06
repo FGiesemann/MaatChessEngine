@@ -18,8 +18,6 @@
 
 #include "chessengine/chess_engine.h"
 
-#include <iostream> // DELME
-
 namespace chessengine {
 
 namespace detail {
@@ -70,17 +68,13 @@ public:
     auto engine() -> EngineT & { return m_engine; }
 
     auto uci_callback() -> void {
-        std::cerr << "[UCIEngine] Received UCI. Sending info and uciok\n";
         m_handler.send_id({.name = ChessEngine::identifier, .author = ChessEngine::author});
         m_handler.send_uciok();
     }
 
     auto debug_callback(bool debug_on) -> void { m_engine.set_debugging(debug_on); }
 
-    auto is_ready_callback() -> void {
-        std::cerr << "[UCIEngine] Received isready. Sending readyok\n";
-        m_handler.send_readyok();
-    }
+    auto is_ready_callback() -> void { m_handler.send_readyok(); }
 
     auto set_option_callback([[maybe_unused]] const chessuci::setoption_command &command) -> void {
         // currently no options
@@ -89,7 +83,6 @@ public:
     auto uci_new_game_callback() -> void { m_engine.new_game(); }
 
     auto position_callback(const chessuci::position_command &command) -> void {
-        std::cerr << "[UCIEngine] Received position: " << command.startpos << '\n';
         if (m_position_setup != command.fen) {
             setup_position(command);
         } else {
@@ -100,7 +93,6 @@ public:
                     if (!matched_move.has_value()) {
                         throw chessuci::UCIError{"Invalid move " + to_string(move)};
                     }
-                    std::cerr << "[UCIEngine::position_callback] Playing move " << to_string(move) << '\n';
                     m_engine.play_move(matched_move.value());
                     m_move_list.push_back(move);
                 });
@@ -115,15 +107,17 @@ public:
         stop_params.max_search_depth = Depth{static_cast<Depth::value_type>(command.depth.value_or(0))};
         stop_params.max_search_nodes = command.nodes.value_or(0);
         stop_params.max_search_time = compute_target_movetime(command);
-
-        std::cerr << "[UCIEngine] Received go: depth = " << stop_params.max_search_depth.value << "; max search nodes = " << stop_params.max_search_nodes
-                  << "; time = " << stop_params.max_search_time.count() << " ms\n";
         m_engine.start_search(stop_params);
     }
 
     auto stop_callback() -> void {
         m_engine.stop_search();
-        chessuci::bestmove_info move_info{.bestmove = chessuci::UCIMove{m_engine.best_move()}, .pondermove = {}};
+        const auto &evaluated_move = m_engine.best_move();
+        const chessuci::UCIMove move{
+            evaluated_move.move.from, evaluated_move.move.to,
+            evaluated_move.move.promoted.has_value() ? std::optional<chesscore::PieceType>{evaluated_move.move.promoted.value().type} : std::nullopt
+        };
+        chessuci::bestmove_info move_info{.bestmove = chessuci::UCIMove{move}, .pondermove = {}};
         m_handler.send_bestmove(move_info);
     }
 
@@ -174,6 +168,9 @@ private:
         m_handler.on_uci([this]() -> void { uci_callback(); });
         m_handler.on_isready([this]() -> void { is_ready_callback(); });
         m_handler.on_position([this](const chessuci::position_command &command) -> void { position_callback(command); });
+        m_handler.on_go([this](const chessuci::go_command &command) -> void { go_callback(command); });
+        m_handler.on_stop([this]() -> void { stop_callback(); });
+        m_handler.on_ponderhit([this]() -> void { ponder_hit_callback(); });
         m_handler.on_quit([this]() -> void { quit_callback(); });
 
         m_handler.register_command("d", [this](const chessuci::TokenList &) -> void { display_board(); });
