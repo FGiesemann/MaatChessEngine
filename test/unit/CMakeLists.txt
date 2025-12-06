@@ -1,4 +1,5 @@
 add_executable(chessengine_tests
+  src/depth_test.cpp
   src/evaluation_test.cpp
   src/score_test.cpp
   src/uci_engine_construct_position_test.cpp
