@@ -46,6 +46,10 @@ static inline auto position_to_string(const chesscore::Position &position) -> st
 
 } // namespace detail
 
+using UCIMoveList = std::vector<chessuci::UCIMove>;
+
+auto construct_position(const chessuci::position_command &command) -> std::pair<chesscore::Position, UCIMoveList>;
+
 template<typename EngineT = ChessEngine>
 class UCIEngine {
 public:
@@ -80,7 +84,7 @@ public:
 
     auto position_callback(const chessuci::position_command &command) -> void {
         if (m_position_setup != command.fen) {
-            m_engine.set_position(construct_position(command));
+            setup_position(command);
         } else {
             const auto mismatch = std::ranges::mismatch(m_move_list, command.moves);
             if (mismatch.in1 == m_move_list.end()) {
@@ -93,7 +97,7 @@ public:
                     m_move_list.push_back(move);
                 });
             } else {
-                m_engine.set_position(construct_position(command));
+                setup_position(command);
             }
         }
     }
@@ -126,21 +130,11 @@ public:
 
     auto unknown_command_handler(const chessuci::TokenList &tokens) -> void { m_handler.send_raw("unknown command " + tokens[0]); }
 
-    auto construct_position(const chessuci::position_command &command) -> chesscore::Position {
+    auto setup_position(const chessuci::position_command &command) -> void {
         m_position_setup = command.fen;
-        m_move_list.clear();
-        const auto fen = command.fen == chessuci::position_command::startpos ? chesscore::FenString::starting_position() : chesscore::FenString{command.fen};
-        auto position = chesscore::Position{fen};
-        std::ranges::for_each(command.moves, [&position, this](const chessuci::UCIMove &move) -> void {
-            const auto matched_move = chessuci::convert_legal_move(move, position);
-            if (matched_move.has_value()) {
-                position.make_move(matched_move.value());
-                m_move_list.push_back(move);
-            } else {
-                throw chessuci::UCIError{"Invalid move " + to_string(move)};
-            }
-        });
-        return position;
+        const auto constructed = construct_position(command);
+        m_engine.set_position(constructed.first);
+        m_move_list = constructed.second;
     }
 
     auto engine_finished_search(const EvaluatedMove &move) -> void {
@@ -159,7 +153,7 @@ private:
     chessuci::UCIEngineHandler m_handler;
     EngineT m_engine;
     std::string m_position_setup{};
-    std::vector<chessuci::UCIMove> m_move_list{}; ///< Moves played so far.
+    UCIMoveList m_move_list{}; ///< Moves played so far.
     std::condition_variable m_quit_signal;
     std::mutex m_quit_mutex;
 
