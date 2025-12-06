@@ -51,7 +51,6 @@ auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
 }
 
 auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
-    m_search_stats = SearchStats{};
     m_color_to_evaluate = m_position.side_to_move();
 
     chesscore::Move best_move{};
