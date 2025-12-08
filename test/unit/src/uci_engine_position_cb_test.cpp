@@ -6,7 +6,7 @@
 #include <catch2/catch_all.hpp>
 
 #include "chessengine/test_engine.h"
-#include "chessengine/uci_engine.h"
+#include "chessengine/uci_adapter.h"
 
 using namespace chessengine;
 using namespace chesscore;
@@ -47,7 +47,7 @@ auto setup_test(const std::string &start_pos, const std::vector<UCIMove> &uci_mo
 } // namespace
 
 TEST_CASE("UCIEngine.Position.Continuation", "[uci_engine]") {
-    auto uci_engine = UCIEngine<TestEngine>{};
+    auto uci_engine = UCIAdapter<TestEngine>{};
     auto &test_engine = uci_engine.engine();
 
     const auto test_case = setup_test(position_command::startpos, {UCIMove{Square::E2, Square::E4}, UCIMove{Square::E7, Square::E5}});
@@ -67,7 +67,7 @@ TEST_CASE("UCIEngine.Position.Continuation", "[uci_engine]") {
 }
 
 TEST_CASE("UCIEngine.Position.Skip Call", "[uci_engine]") {
-    auto uci_engine = UCIEngine<TestEngine>{};
+    auto uci_engine = UCIAdapter<TestEngine>{};
     auto &test_engine = uci_engine.engine();
 
     const auto test_case = setup_test(
@@ -103,7 +103,7 @@ TEST_CASE("UCIEngine.Position.Skip Call", "[uci_engine]") {
 }
 
 TEST_CASE("UCIEngine.Position.Jump Back", "[uci_engine]") {
-    auto uci_engine = UCIEngine<TestEngine>{};
+    auto uci_engine = UCIAdapter<TestEngine>{};
     auto &test_engine = uci_engine.engine();
 
     const auto test_case = setup_test(
@@ -130,7 +130,7 @@ TEST_CASE("UCIEngine.Position.Jump Back", "[uci_engine]") {
 }
 
 TEST_CASE("UCIEngine.Position.Switch Line", "[uci_engine]") {
-    auto uci_engine = UCIEngine<TestEngine>{};
+    auto uci_engine = UCIAdapter<TestEngine>{};
     auto &test_engine = uci_engine.engine();
 
     const auto test_case1 = setup_test(

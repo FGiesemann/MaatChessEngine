@@ -3,7 +3,7 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
-#include "chessengine/uci_engine.h"
+#include "chessengine/uci_adapter.h"
 
 namespace chessengine {
 

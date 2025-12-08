@@ -3,8 +3,8 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
-#ifndef CHESS_ENGINE_MAAT_UCIENGINE_H
-#define CHESS_ENGINE_MAAT_UCIENGINE_H
+#ifndef CHESS_ENGINE_MAAT_UCIADAPTER_H
+#define CHESS_ENGINE_MAAT_UCIADAPTER_H
 
 #include <algorithm>
 #include <condition_variable>
@@ -51,9 +51,9 @@ using UCIMoveList = std::vector<chessuci::UCIMove>;
 auto construct_position(const chessuci::position_command &command) -> std::pair<chesscore::Position, UCIMoveList>;
 
 template<typename EngineT = ChessEngine>
-class UCIEngine {
+class UCIAdapter {
 public:
-    explicit UCIEngine(std::istream &in_stream = std::cin, std::ostream &out_stream = std::cout) : m_handler{in_stream, out_stream} {
+    explicit UCIAdapter(std::istream &in_stream = std::cin, std::ostream &out_stream = std::cout) : m_handler{in_stream, out_stream} {
         register_callbacks();
         auto config = m_engine.config();
         config.search_config.iterative_deepening = true;
