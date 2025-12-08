@@ -6,17 +6,18 @@
 #ifndef CHESS_ENGINE_MAAT_UCIADAPTER_H
 #define CHESS_ENGINE_MAAT_UCIADAPTER_H
 
+#include "chessengine/chess_engine.h"
+#include "chessengine/logger.h"
+
+#include <chesscore/fen.h>
+#include <chessuci/engine_handler.h>
+
 #include <algorithm>
 #include <condition_variable>
 #include <iosfwd>
 #include <mutex>
 #include <sstream>
 #include <string>
-
-#include <chesscore/fen.h>
-#include <chessuci/engine_handler.h>
-
-#include "chessengine/chess_engine.h"
 
 namespace chessengine {
 
@@ -68,71 +69,93 @@ public:
     auto engine() -> EngineT & { return m_engine; }
 
     auto uci_callback() -> void {
+        log_uci_out("sending UCI identification");
         m_handler.send_id({.name = ChessEngine::identifier, .author = ChessEngine::author});
+        log_uci_out("sending uciok");
         m_handler.send_uciok();
     }
 
-    auto debug_callback(bool debug_on) -> void { m_engine.set_debugging(debug_on); }
+    auto debug_callback(bool debug_on) -> void {
+        log_info("setting debug " + std::string(debug_on ? "on" : "off"));
+        m_engine.set_debugging(debug_on);
+    }
 
-    auto is_ready_callback() -> void { m_handler.send_readyok(); }
+    auto is_ready_callback() -> void {
+        log_uci_out("sending readyok");
+        m_handler.send_readyok();
+    }
 
     auto set_option_callback([[maybe_unused]] const chessuci::setoption_command &command) -> void {
+        log_info_stream() << "request to set option '" << command.name << "' ignored";
         // currently no options
     }
 
-    auto uci_new_game_callback() -> void { m_engine.new_game(); }
+    auto uci_new_game_callback() -> void {
+        log_info("setting up new game");
+        m_engine.new_game();
+    }
 
     auto position_callback(const chessuci::position_command &command) -> void {
         if (m_position_setup != command.fen) {
+            log_info("setting up position from new FEN");
             setup_position(command);
         } else {
             const auto mismatch = std::ranges::mismatch(m_move_list, command.moves);
             if (mismatch.in1 == m_move_list.end()) {
+                log_info("applying new moves to current position");
                 std::for_each(mismatch.in2, command.moves.end(), [this](const chessuci::UCIMove &move) -> void {
                     const auto matched_move = chessuci::convert_legal_move(move, m_engine.position());
                     if (!matched_move.has_value()) {
                         throw chessuci::UCIError{"Invalid move " + to_string(move)};
                     }
+                    log_info("playing move: " + to_string(move));
                     m_engine.play_move(matched_move.value());
                     m_move_list.push_back(move);
                 });
             } else {
+                log_info("setting up position due to changes in move list");
                 setup_position(command);
             }
         }
     }
 
     auto go_callback(const chessuci::go_command &command) -> void {
+        log_uci_in(to_string(command));
         StopParameters stop_params;
         stop_params.max_search_depth = Depth{static_cast<Depth::value_type>(command.depth.value_or(0))};
         stop_params.max_search_nodes = command.nodes.value_or(0);
         stop_params.max_search_time = compute_target_movetime(command);
+        log_info_stream() << "starting search with stopping criteria: " << to_string(stop_params);
         m_engine.start_search(stop_params);
     }
 
     auto stop_callback() -> void {
+        log_info("stop requested");
         m_engine.stop_search();
         const auto &evaluated_move = m_engine.best_move();
         const chessuci::UCIMove move{
             evaluated_move.move.from, evaluated_move.move.to,
             evaluated_move.move.promoted.has_value() ? std::optional<chesscore::PieceType>{evaluated_move.move.promoted.value().type} : std::nullopt
         };
-        chessuci::bestmove_info move_info{.bestmove = chessuci::UCIMove{move}, .pondermove = {}};
+        chessuci::bestmove_info move_info{.bestmove = move, .pondermove = {}};
+        log_uci_out_stream() << "best move " << to_string(move) << "; value " << evaluated_move.score.value;
         m_handler.send_bestmove(move_info);
     }
 
     auto ponder_hit_callback() -> void {
+        log_info("ponderhit ignored");
         // TODO
     }
 
     auto quit_callback() -> void {
+        log_info("requested to quit");
         m_handler.stop();
         m_quit_signal.notify_one();
     }
 
     auto display_board() -> void { m_handler.send_raw(detail::position_to_string(m_engine.position())); }
 
-    auto unknown_command_handler(const chessuci::TokenList &tokens) -> void { m_handler.send_raw("unknown command " + tokens[0]); }
+    auto unknown_command_handler(const chessuci::TokenList &tokens) -> void { log_error_stream() << "unknown command '" << tokens[0] << '\''; }
 
     auto setup_position(const chessuci::position_command &command) -> void {
         m_position_setup = command.fen;
@@ -143,6 +166,8 @@ public:
 
     auto engine_finished_search(const EvaluatedMove &move) -> void {
         chessuci::bestmove_info move_info{.bestmove = chessuci::UCIMove{move.move}, .pondermove = {}};
+        log_info_stream() << "engine finished search: best move " << to_string(move.move) << "; value " << move.score.value
+                          << "; pondermove = " << (move_info.pondermove.has_value() ? to_string(move_info.pondermove.value()) : "none");
         m_handler.send_bestmove(move_info);
     }
 
@@ -151,6 +176,7 @@ public:
         info.currmove = chessuci::UCIMove{search_stats.best_move.move};
         info.depth = search_stats.depth.value;
         info.nodes = search_stats.nodes;
+        log_info_stream() << "search progress " << to_string(info.currmove.value()) << ", depth " << info.depth.value() << ", nodes " << info.nodes.value();
         m_handler.send_info(info);
     }
 private:
