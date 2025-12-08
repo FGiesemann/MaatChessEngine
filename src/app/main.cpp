@@ -10,7 +10,12 @@
 #include "chessengine/uci_adapter.h"
 
 auto main() -> int {
-    chessengine::UCIAdapter<chessengine::ChessEngine> engine{std::cin, std::cout};
-    engine.run();
+    chessengine::UCIAdapter<chessengine::ChessEngine> uci_adapter{std::cin, std::cout};
+
+    auto config = uci_adapter.engine().config();
+    config.search_config.iterative_deepening = true;
+    uci_adapter.engine().set_config(config);
+
+    uci_adapter.run();
     return 0;
 }
