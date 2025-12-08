@@ -7,10 +7,10 @@
 #include <thread>
 
 #include "chessengine/chess_engine.h"
-#include "chessengine/uci_engine.h"
+#include "chessengine/uci_adapter.h"
 
 auto main() -> int {
-    chessengine::UCIEngine<chessengine::ChessEngine> engine{std::cin, std::cout};
+    chessengine::UCIAdapter<chessengine::ChessEngine> engine{std::cin, std::cout};
     engine.run();
     return 0;
 }
