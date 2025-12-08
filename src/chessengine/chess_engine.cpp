@@ -37,9 +37,6 @@ auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
             m_search_stats.best_move = best_move;
             m_search_progress_callback(m_search_stats);
         }
-        if (m_search_stats.depth + Depth::Step > m_stopping_params.max_search_depth) {
-            break;
-        }
         m_search_stats.depth += Depth::Step;
     }
 
