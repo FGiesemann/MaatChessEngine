@@ -2,6 +2,7 @@ add_library(ChessEngineLib
     chessengine/chess_engine.cpp
     chessengine/config.cpp
     chessengine/evaluation.cpp
+    chessengine/logger.cpp
     chessengine/test_engine.cpp
     chessengine/types.cpp
     chessengine/uci_adapter.cpp
