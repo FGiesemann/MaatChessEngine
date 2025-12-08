@@ -270,6 +270,8 @@ struct StopParameters {
     std::uint64_t max_search_nodes{0};
 };
 
+auto to_string(const StopParameters &params) -> std::string;
+
 } // namespace chessengine
 
 #endif
