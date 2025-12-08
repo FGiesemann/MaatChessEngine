@@ -54,6 +54,14 @@ public:
     auto search_stats() const -> const SearchStats &;
 
     /**
+     * \brief Calculate the current search time.
+     *
+     * Calculates the elapsed time from the start of the last search.
+     * \return Duration of the current search.
+     */
+    auto search_time() const -> std::chrono::milliseconds;
+
+    /**
      * \brief Reset internal state in preparation for a new game.
      */
     auto new_game() -> void;

@@ -35,6 +35,7 @@ auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
         }
         if (m_search_progress_callback) {
             m_search_stats.best_move = best_move;
+            m_search_stats.elapsed_time = search_time();
             m_search_progress_callback(m_search_stats);
         }
         m_search_stats.depth += Depth::Step;
@@ -176,6 +177,10 @@ auto ChessEngine::load_config(const std::filesystem::path &filename) -> void {
     m_config = Config::from_file(filename);
 }
 
+auto ChessEngine::search_time() const -> std::chrono::milliseconds {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_search_start);
+}
+
 auto ChessEngine::should_stop() const -> bool {
     if (m_stop_requested) {
         return true;
@@ -187,7 +192,7 @@ auto ChessEngine::should_stop() const -> bool {
         return true;
     }
     if (m_stopping_params.max_search_time.count() > 0 && (m_search_stats.nodes % stop_check_interval == 0)) {
-        const auto search_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_search_start);
+        const auto search_duration = search_time();
         const auto time_exceeded = search_duration > m_stopping_params.max_search_time;
         return time_exceeded;
     }
