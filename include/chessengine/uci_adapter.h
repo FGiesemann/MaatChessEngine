@@ -176,7 +176,9 @@ public:
         info.currmove = chessuci::UCIMove{search_stats.best_move.move};
         info.depth = search_stats.depth.value;
         info.nodes = search_stats.nodes;
-        log_info_stream() << "search progress " << to_string(info.currmove.value()) << ", depth " << info.depth.value() << ", nodes " << info.nodes.value();
+        info.time = search_stats.elapsed_time.count();
+        log_info_stream() << "search progress " << to_string(info.currmove.value()) << ", depth " << info.depth.value() << ", nodes " << info.nodes.value() << "; time "
+                          << info.time.value() << "ms";
         m_handler.send_info(info);
     }
 private:
