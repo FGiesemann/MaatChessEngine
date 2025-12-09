@@ -9,6 +9,7 @@ add_library(ChessEngineLib
 )
 add_compiler_warnings(ChessEngineLib)
 target_compile_features(ChessEngineLib PUBLIC cxx_std_23)
+target_compile_options(ChessEngineLib PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
 target_include_directories(ChessEngineLib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
@@ -23,3 +24,4 @@ add_executable(maat
 )
 add_compiler_warnings(maat)
 target_link_libraries(maat PRIVATE ChessEngineLib)
+target_compile_options(maat PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
