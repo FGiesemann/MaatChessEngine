@@ -191,7 +191,7 @@ auto ChessEngine::should_stop() const -> bool {
     if (m_stopping_params.max_search_nodes > 0 && m_search_stats.nodes > m_stopping_params.max_search_nodes) {
         return true;
     }
-    if (m_stopping_params.max_search_time.count() > 0 && (m_search_stats.nodes % stop_check_interval == 0)) {
+    if (m_stopping_params.max_search_time.count() > 0) {
         const auto search_duration = search_time();
         const auto time_exceeded = search_duration > m_stopping_params.max_search_time;
         return time_exceeded;
