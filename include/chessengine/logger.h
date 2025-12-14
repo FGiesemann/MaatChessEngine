@@ -28,6 +28,13 @@ public:
         return logger;
     }
 
+    auto indent() -> void { m_indent += 2; }
+    auto unindent() -> void {
+        m_indent -= 2;
+        if (m_indent < 0)
+            m_indent = 0;
+    }
+
     auto enable(const std::string &filepath, bool append = false) -> void {
         m_enabled = true;
         auto mode = append ? (std::ios::out | std::ios::app) : std::ios::out;
@@ -84,6 +91,7 @@ public:
 private:
     bool m_enabled{false};
     std::ofstream m_file;
+    int m_indent{0};
 
     auto log_internal(const std::string &tag, const std::string &message) -> void {
         if (!m_file.is_open())
@@ -92,7 +100,7 @@ private:
         auto now = std::chrono::system_clock::now();
         auto time = std::chrono::floor<std::chrono::milliseconds>(now);
 
-        m_file << std::format("{:%H:%M:%S} [{}] {}\n", time, tag, message);
+        m_file << std::format("{:%H:%M:%S} [{}] {:{}s}{:s}\n", time, tag, "", m_indent, message);
         m_file.flush();
     }
 };
@@ -116,6 +124,14 @@ private:
     void (Logger::*m_log_func)(const std::string &);
     std::ostringstream m_stream;
 };
+
+inline auto log_indent() -> void {
+    chessengine::Logger::instance().indent();
+}
+
+inline auto log_unindent() -> void {
+    chessengine::Logger::instance().unindent();
+}
 
 inline auto log_uci_in(const std::string &in) -> void {
     chessengine::Logger::instance().log_uci_in(in);
