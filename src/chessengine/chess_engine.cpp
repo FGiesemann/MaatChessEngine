@@ -30,9 +30,7 @@ auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
             m_best_move = best_move;
             break;
         }
-        if (best_move.score > m_best_move.score) {
-            m_best_move = best_move;
-        }
+        m_best_move = best_move;
         if (m_search_progress_callback) {
             m_search_stats.best_move = best_move;
             m_search_stats.elapsed_time = search_time();
