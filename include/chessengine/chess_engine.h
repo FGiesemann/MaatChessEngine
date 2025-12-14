@@ -186,7 +186,7 @@ private:
 
     auto search_position(Depth depth) -> EvaluatedMove;
     auto search_position(Depth depth, Bounds bounds, bool maximizing_player) -> Score;
-    auto moves_to_search() const -> chesscore::MoveList;
+    auto moves_to_search(bool search_principal_variation_first = false) const -> chesscore::MoveList;
 
     auto sort_moves(chesscore::MoveList &moves) const -> void;
 };

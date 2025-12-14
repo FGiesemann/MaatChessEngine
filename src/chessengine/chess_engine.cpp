@@ -51,7 +51,7 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
 
     chesscore::Move best_move{};
     auto best_value = Score::NegInfinity;
-    const auto moves = moves_to_search();
+    const auto moves = moves_to_search(depth > Depth::Step);
     for (const auto &move : moves) {
         m_position.make_move(move);
         auto value = search_position(depth - Depth::Step, Bounds{}, false);
@@ -122,11 +122,16 @@ auto ChessEngine::search_position(Depth depth, Bounds bounds, bool maximizing_pl
     }
 }
 
-auto ChessEngine::moves_to_search() const -> chesscore::MoveList {
+auto ChessEngine::moves_to_search(bool search_principal_variation_first) const -> chesscore::MoveList {
     auto moves = m_position.all_legal_moves();
-    // TODO: feed in the best move from the previous iteration to search first...
     if (m_config.minimax_config.use_move_ordering) {
         sort_moves(moves);
+        if (search_principal_variation_first) {
+            auto it = std::find(moves.begin(), moves.end(), m_best_move.move);
+            if (it != moves.end()) {
+                std::rotate(moves.begin(), it, it + 1);
+            }
+        }
     }
     return moves;
 }
