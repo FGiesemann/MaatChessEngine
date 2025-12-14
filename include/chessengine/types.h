@@ -31,7 +31,7 @@ struct StrongType {
      *
      * \param value The value.
      */
-    constexpr explicit StrongType(value_type value = {}) : value{value} {}
+    constexpr explicit StrongType(value_type val = {}) : value{val} {}
 
     /**
      * \brief Comparison operator for values of the same strong type.
@@ -239,7 +239,7 @@ constexpr auto ply_to_mate(Score score) -> Depth {
  */
 struct EvaluatedMove {
     chesscore::Move move;            ///< The move.
-    Score score{Score::NegInfinity}; ///< Scor for the move.
+    Score score{Score::NegInfinity}; ///< Score for the move.
 };
 
 /**
