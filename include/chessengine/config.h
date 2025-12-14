@@ -26,6 +26,7 @@ struct MinimaxConfig {
  */
 struct SearchConfig {
     bool iterative_deepening{false}; ///< If iterative deepening should be used.
+    bool search_pv_first{true};      ///< If the principal variation from the previous iteration should be searched first.
 };
 
 /**

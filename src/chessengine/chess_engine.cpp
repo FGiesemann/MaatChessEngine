@@ -51,7 +51,7 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
 
     chesscore::Move best_move{};
     auto best_value = Score::NegInfinity;
-    const auto moves = moves_to_search(depth > Depth::Step);
+    const auto moves = moves_to_search(m_config.search_config.search_pv_first && depth > Depth::Step);
     for (const auto &move : moves) {
         m_position.make_move(move);
         auto value = search_position(depth - Depth::Step, Bounds{}, false);
