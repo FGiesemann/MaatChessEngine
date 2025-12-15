@@ -14,7 +14,7 @@ list is currently used to determine the expected mate depth.
 
 As a source of mate-in-x puzzles, the [lichess puzzles](https://database.lichess.org/#puzzles)
 can be downloaded from the website. These contain a set of mate-in-x puzzles.
-To extract only the mate-in-x puzzles, the lichess_converter is provided. It
+To extract only the mate-in-x puzzles, the **lichess_converter** is provided. It
 reads the lichess database CSV file, prepares the puzzle and writes it as an
 EPD record into the `mate_in_x.epd` file.
 
@@ -35,11 +35,17 @@ and outputting the new position as the puzzle start. The second move in the move
 list is given as the `bm` (best move), while the move list without the first
 move is stored as the `pv` for the puzzle.
 
-In order to handle ambiguous best moves, the following strategy could be used:
-After extracting the information from the CSV and writing the puzzles to EPD,
-the positions could be fed to stockfish. Then, `MultiPV` is enabled to find not
-only the best, but a few good moves. After `go` with the appropriate depth,
-stockfish should show multiple solutions, if they exists.
+### Ambiguous best moves
+
+For some puzzles (especially mate in 1), multiple moves could enforce mate.
+The mate_in_x testprogram can also process multiple `bm` in the epd suite.
+
+The multiple_solution_finder is provided to preprocess the epd file using
+stockfish to detect multiple mating moves and extends the epd file accordingly.
+
+Stockfish can give multiple solutions, when `MultiPV` is enabled. After `go`
+with the appropriate depth, stockfish should show multiple solutions, if they
+exists.
 
 Here is an example:
 
