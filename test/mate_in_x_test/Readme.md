@@ -1,7 +1,7 @@
 # Mate-in-x test
 
-The test analyses positions which have a forced mate in a given search depth.
-The position, mate depth and best move are read from an EPD file that can
+The test analyses positions which have a forced mate at a given search depth.
+The position, mate depth, and best move are read from an EPD file that can
 contain many such test cases. The test shall make sure that the search algorithm
 for moves in positions is working correctly.
 
@@ -14,16 +14,16 @@ list is currently used to determine the expected mate depth.
 
 As a source of mate-in-x puzzles, the [lichess puzzles](https://database.lichess.org/#puzzles)
 can be downloaded from the website. These contain a set of mate-in-x puzzles.
-To extract only the mate-in-x puzzles, the licehss_converter is provided. It
+To extract only the mate-in-x puzzles, the lichess_converter is provided. It
 reads the lichess database CSV file, prepares the puzzle and writes it as an
-EPD record into the `mate_i_x.epd` file.
+EPD record into the `mate_in_x.epd` file.
 
 The dataset contains only one best move for every position, although some of the
 puzzles have multiple solutions!
 
 ### Conversion process
 
-The licahess database is a CSV file that specifies a puzzle id, a position, a
+The lichess database is a CSV file that specifies a puzzle id, a position, a
 list of moves, and a puzzle theme (amongst other information).
 
 > The position is _not_ the starting position for the puzzle! Instead, the first
