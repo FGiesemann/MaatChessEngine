@@ -1,18 +1,18 @@
 /* ************************************************************************** *
- * Chess Engine                                                               *
+ * Chess Engine Maat                                                          *
  * Chess playing engine                                                       *
  * ************************************************************************** */
+
+#include <chesscore/epd.h>
+#include <chesscore/position.h>
+#include <chessgame/san.h>
+#include <chessuci/move.h>
 
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include <chesscore/epd.h>
-#include <chesscore/position.h>
-#include <chessgame/san.h>
-#include <chessuci/move.h>
 
 using namespace std::literals;
 
@@ -44,8 +44,8 @@ auto convert_to_san_move(const chesscore::Move &move, const chesscore::Position 
 auto convert_to_san_moves(const chesscore::MoveList &moves, chesscore::Position position, chesscore::EpdRecord::move_list &list) -> void;
 
 auto main(int argc, const char *argv[]) -> int {
-    if (argc < 2) {
-        std::cerr << "Usage: "s << argv[0] << " <input_file>\n";
+    if (argc < 3) {
+        std::cerr << "Usage: "s << argv[0] << " <input_file> <output_file>\n";
         return 1;
     }
 
@@ -61,7 +61,8 @@ auto main(int argc, const char *argv[]) -> int {
     std::cout << "Sorting...\n";
     std::ranges::sort(puzzles, [](const MateInXPuzzle &a, const MateInXPuzzle &b) { return a.mate_plys() < b.mate_plys(); });
     std::cout << "Writing EPD file...\n";
-    std::ofstream epd_file{"mate_in_x.epd"};
+    std::string output_filename{argv[2]};
+    std::ofstream epd_file{output_filename};
     write_puzzles(epd_file, puzzles);
     std::cout << "Done.\n";
 
