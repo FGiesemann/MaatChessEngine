@@ -64,6 +64,9 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
         if (value > best_value) {
             best_move = move;
             best_value = value;
+            if (!m_config.search_config.iterative_deepening) {
+                m_best_move = {best_move, best_value};
+            }
         }
     }
     m_search_stats.nodes += 1;
