@@ -46,6 +46,9 @@ private:
 };
 
 MultiSolutionFinder::MultiSolutionFinder(const chessuci::ProcessParams &params, const std::string &input, const std::string &output) {
+    m_uci_handler.on_readyok(std::bind(&MultiSolutionFinder::readyok, this));
+    m_uci_handler.on_info(std::bind(&MultiSolutionFinder::search_info, this, std::placeholders::_1));
+    m_uci_handler.on_bestmove(std::bind(&MultiSolutionFinder::bestmove, this, std::placeholders::_1));
     m_uci_handler.start(params);
     m_uci_handler.send_uci();
     m_uci_handler.send_isready();
@@ -124,8 +127,7 @@ auto MultiSolutionFinder::search_info(const chessuci::search_info &info) -> void
     }
     if (info.score.has_value() && info.score.value().mate.has_value()) {
         int mate = info.score->mate.value();
-        int multi_pv = info.multipv.value_or(0);
-        if (multi_pv != 0 && !info.pv.empty()) {
+        if (!info.pv.empty()) {
             const auto &uci_move = info.pv.front();
             const auto move = convert_legal_move(uci_move, m_current_record->position);
             if (!move.has_value()) {
