@@ -88,15 +88,23 @@ auto MultiSolutionFinder::process_test(chesscore::EpdRecord &record) -> void {
     m_received_callback = Callback::None;
     int expected_depth = record.pv.size();
     std::string position_fen = chesscore::FenString{record.position.piece_placement(), record.position.state()}.str();
+    int max_variants = 5;
 
-    m_uci_handler.send_ucinewgame();
-    m_uci_handler.send_setoption({.name = "MultiPV", .value = "10"});
-    m_uci_handler.send_isready();
-    std::unique_lock lock{m_mutex};
-    m_condvar.wait(lock, [&]() { return m_received_callback == Callback::IsReady; });
-    m_uci_handler.send_position({.fen = position_fen});
-    m_uci_handler.send_go({.depth = expected_depth});
-    m_condvar.wait(lock, [&]() { return m_received_callback == Callback::BestMove; });
+    while (true) {
+        m_uci_handler.send_ucinewgame();
+        m_uci_handler.send_setoption({.name = "MultiPV", .value = std::to_string(max_variants)});
+        m_uci_handler.send_isready();
+        std::unique_lock lock{m_mutex};
+        m_condvar.wait(lock, [&]() { return m_received_callback == Callback::IsReady; });
+        m_uci_handler.send_position({.fen = position_fen});
+        m_uci_handler.send_go({.depth = expected_depth});
+        m_condvar.wait(lock, [&]() { return m_received_callback == Callback::BestMove; });
+        if (record.bm.size() < max_variants) {
+            break;
+        }
+        max_variants *= 2;
+        m_received_callback = Callback::None;
+    }
     m_current_record = nullptr;
 }
 
