@@ -96,7 +96,7 @@ auto read_puzzles(std::istream &input) -> std::vector<MateInXPuzzle> {
         }
 
         if ((line_count + 1) % 100 == 0) {
-            std::cout << "\rFound " << puzzles.size() << " puzzles";
+            std::cout << "\rFound " << puzzles.size() << " mate-in-x puzzles";
         }
     }
     std::cout << "\rFound " << puzzles.size() << " puzzles\n";
