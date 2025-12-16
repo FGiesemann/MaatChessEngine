@@ -61,9 +61,12 @@ MultiSolutionFinder::~MultiSolutionFinder() {
 }
 
 auto MultiSolutionFinder::process() -> void {
+    std::cout << "Loading test cases\n";
     read_test_suite();
     process_tests();
+    std::cout << "Writing results\n";
     write_results();
+    std::cout << "Done.\n";
 }
 
 auto MultiSolutionFinder::read_test_suite() -> void {
@@ -73,14 +76,20 @@ auto MultiSolutionFinder::read_test_suite() -> void {
     }
 
     m_tests = chesscore::read_epd(input_file);
+    std::cout << "Loaded " << m_tests.size() << " test cases\n";
 }
 
 auto MultiSolutionFinder::process_tests() -> void {
     for (auto &record : m_tests) {
+        std::cout << "Test " << record.id.value_or("[unknown]") << ": ";
         if (record.pv.size() == 1) {
             process_test(record);
+            std::cout << "mating moves: " << record.bm.size() << "\n";
+        } else {
+            std::cout << "skipped (" << record.pv.size() << " moves)\n";
         }
     }
+    std::cout << "All tests done.\n";
 }
 
 auto MultiSolutionFinder::process_test(chesscore::EpdRecord &record) -> void {
