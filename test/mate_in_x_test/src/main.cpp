@@ -62,7 +62,7 @@ auto main(int argc, const char *argv[]) -> int {
         test_runner.set_threads(params.thread_count);
     }
 
-    test_runner.run_tests(argv[1], params.first_test_id);
+    test_runner.run_tests(params.input_file, params.first_test_id);
 
     return 0;
 }
