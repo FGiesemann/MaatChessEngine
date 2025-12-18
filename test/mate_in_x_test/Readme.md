@@ -15,11 +15,8 @@ list is currently used to determine the expected mate depth.
 As a source of mate-in-x puzzles, the [lichess puzzles](https://database.lichess.org/#puzzles)
 can be downloaded from the website. These contain a set of mate-in-x puzzles.
 To extract only the mate-in-x puzzles, the **lichess_converter** is provided. It
-reads the lichess database CSV file, prepares the puzzle and writes it as an
-EPD record into the `mate_in_x.epd` file.
-
-The dataset contains only one best move for every position, although some of the
-puzzles have multiple solutions!
+reads the lichess database CSV file, prepares the puzzles and writes them as an
+EPD file.
 
 ### Conversion process
 
@@ -37,17 +34,12 @@ move is stored as the `pv` for the puzzle.
 
 ### Ambiguous best moves
 
-For some puzzles (especially mate in 1), multiple moves could enforce mate.
-The mate_in_x testprogram can also process multiple `bm` in the epd suite.
+For mate in 1 puzzles, only a single best move is given in the CSV file,
+although multiple moves might be possible. The lichess_converter can therefore
+been provided with the path to stockfish. This is then used to find multiple
+possible solutons for mate in 1 puzzles.
 
-The multiple_solution_finder is provided to preprocess the epd file using
-stockfish to detect multiple mating moves and extends the epd file accordingly.
-
-Stockfish can give multiple solutions, when `MultiPV` is enabled. After `go`
-with the appropriate depth, stockfish should show multiple solutions, if they
-exists.
-
-Here is an example:
+Here is an example of using stockfish:
 
 ```sh
 > ./stockfish
@@ -78,3 +70,12 @@ bestmove d1d8
 
 Lines with `score mate x` describe a solution with a mate-in-x. Here, we see two
 possible solutions `d1d8` and `f1f8`.
+
+This is automatically done for mate-in-1 puzzles, when the conveter is started
+with the `--stockfish <path>` argument.
+
+### Puzzle output
+
+If a file name is specified, all puzzles are written into that file. If instead
+a directory is given, the converter writes different files with names
+`mate_in_x.epd`, where x is replaced by the mate depth.
