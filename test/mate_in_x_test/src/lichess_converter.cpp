@@ -232,6 +232,11 @@ auto process_args(int argc, char *argv[]) -> Params {
 auto main(int argc, char *argv[]) -> int {
     if (argc < 2) {
         std::cout << "Usage: " << argv[0] << " [--stockfish <path>] <input_file> <output>\n";
+        std::cout << "\n\t--stockfish\tPath to Stockfish executable\n";
+        std::cout << "\tinput_file\tPath to the input CSV-file\n";
+        std::cout << "\toutput\t\tPath to the output. Can be a filename or a directory\n";
+        std::cout << "\t\t\tIf a file name is given, all puzzles are written to the file\n";
+        std::cout << "\t\t\tIf a directory is given, puzzles are written to separate files (mate_in_x.epd, for depth x)\n";
         return 1;
     }
 
