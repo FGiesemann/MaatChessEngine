@@ -105,7 +105,8 @@ auto MateInXTest::perform_test(const chesscore::EpdRecord &test) -> MateInXResul
 auto MateInXTest::log_result(const MateInXResult &result) -> void {
     ++m_tests_performed;
     std::stringstream log_message;
-    log_message << "Test " << std::setw(m_places) << m_tests_performed << " [" << result.test_id << "]: ";
+    log_message << "Test " << std::setw(m_places) << m_tests_performed << " (" << std::fixed << std::setw(6) << std::setprecision(2)
+                << (m_tests_performed / static_cast<double>(m_tests.size()) * 100.0F) << " %) [" << result.test_id << "]: ";
     if (!result.found_mate) {
         log_message << "NO MATE\n";
     } else {
