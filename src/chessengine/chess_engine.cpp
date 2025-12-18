@@ -40,6 +40,7 @@ auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
     }
 
     m_search_running = false;
+    m_search_stats.elapsed_time = search_time();
     if (m_search_ended_callback) {
         m_search_ended_callback(m_best_move);
     }
