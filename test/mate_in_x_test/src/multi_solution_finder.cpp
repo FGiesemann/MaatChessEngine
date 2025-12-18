@@ -3,102 +3,35 @@
  * Chess playing engine                                                       *
  * ************************************************************************** */
 
-#include <chesscore/epd.h>
-#include <chesscore/fen.h>
-#include <chessgame/san.h>
-#include <chessuci/gui_handler.h>
+#include "multi_solution_finder.h"
 
-#include <condition_variable>
+#include <chessgame/san.h>
+
 #include <fstream>
 #include <iostream>
-#include <mutex>
-#include <string>
-#include <vector>
 
-class MultiSolutionFinder {
-public:
-    MultiSolutionFinder(const chessuci::ProcessParams &params, const std::string &input, const std::string &output);
-    ~MultiSolutionFinder();
+namespace chessengine::mate_in_x {
 
-    auto process() -> void;
-private:
-    enum class Callback { None, IsReady, BestMove };
-
-    chessuci::UCIGuiHandler m_uci_handler;
-    std::string m_in_path;
-    std::string m_out_path;
-    chesscore::EpdSuite m_tests;
-    std::mutex m_mutex;
-    std::mutex m_info_mutex;
-    std::condition_variable m_condvar;
-    Callback m_received_callback{Callback::None};
-
-    chesscore::EpdRecord *m_current_record{};
-
-    auto read_test_suite() -> void;
-    auto process_tests() -> void;
-    auto process_test(chesscore::EpdRecord &record) -> void;
-    auto write_results() -> void;
-
-    auto readyok() -> void;
-    auto search_info(const chessuci::search_info &info) -> void;
-    auto bestmove(const chessuci::bestmove_info &info) -> void;
-};
-
-MultiSolutionFinder::MultiSolutionFinder(const chessuci::ProcessParams &params, const std::string &input, const std::string &output) {
+MultiSolutionFinder::MultiSolutionFinder(const chessuci::ProcessParams &params) {
     m_uci_handler.on_readyok(std::bind(&MultiSolutionFinder::readyok, this));
     m_uci_handler.on_info(std::bind(&MultiSolutionFinder::search_info, this, std::placeholders::_1));
     m_uci_handler.on_bestmove(std::bind(&MultiSolutionFinder::bestmove, this, std::placeholders::_1));
     m_uci_handler.start(params);
     m_uci_handler.send_uci();
     m_uci_handler.send_isready();
-    m_in_path = input;
-    m_out_path = output;
 }
 
 MultiSolutionFinder::~MultiSolutionFinder() {
     m_uci_handler.stop();
 }
 
-auto MultiSolutionFinder::process() -> void {
-    std::cout << "Loading test cases\n";
-    read_test_suite();
-    process_tests();
-    std::cout << "Writing results\n";
-    write_results();
-    std::cout << "Done.\n";
-}
-
-auto MultiSolutionFinder::read_test_suite() -> void {
-    std::ifstream input_file{m_in_path};
-    if (!input_file.is_open()) {
-        throw std::runtime_error{"Could not open input file"};
-    }
-
-    m_tests = chesscore::read_epd(input_file);
-    std::cout << "Loaded " << m_tests.size() << " test cases\n";
-}
-
-auto MultiSolutionFinder::process_tests() -> void {
-    for (auto &record : m_tests) {
-        std::cout << "Test " << record.id.value_or("[unknown]") << ": ";
-        if (record.pv.size() == 1) {
-            process_test(record);
-            std::cout << "mating moves: " << record.bm.size() << "\n";
-        } else {
-            std::cout << "skipped (" << record.pv.size() << " moves)\n";
-        }
-    }
-    std::cout << "All tests done.\n";
-}
-
-auto MultiSolutionFinder::process_test(chesscore::EpdRecord &record) -> void {
+auto MultiSolutionFinder::process(chesscore::EpdRecord &record) -> void {
     m_current_record = &record;
-    m_received_callback = Callback::None;
     int expected_depth = record.pv.size();
     std::string position_fen = chesscore::FenString{record.position.piece_placement(), record.position.state()}.str();
     int max_variants = 5;
 
+    m_received_callback = Callback::None;
     while (true) {
         m_uci_handler.send_ucinewgame();
         m_uci_handler.send_setoption({.name = "MultiPV", .value = std::to_string(max_variants)});
@@ -115,17 +48,6 @@ auto MultiSolutionFinder::process_test(chesscore::EpdRecord &record) -> void {
         m_received_callback = Callback::None;
     }
     m_current_record = nullptr;
-}
-
-auto MultiSolutionFinder::write_results() -> void {
-    std::ofstream out_file{m_out_path};
-    if (!out_file.is_open()) {
-        throw std::runtime_error{"Could no open output file"};
-    }
-
-    for (const auto &record : m_tests) {
-        chesscore::write_epd_record(out_file, record);
-    }
 }
 
 auto MultiSolutionFinder::readyok() -> void {
@@ -170,13 +92,4 @@ auto MultiSolutionFinder::bestmove(const chessuci::bestmove_info &info) -> void 
     m_condvar.notify_one();
 }
 
-auto main(int argc, char *argv[]) -> int {
-    if (argc < 4) {
-        std::cerr << "Usage: " << argv[0] << " <stockfish> <input> <output>\n";
-        return 1;
-    }
-
-    chessuci::ProcessParams params{.executable = std::string{argv[1]}};
-    MultiSolutionFinder finder{params, std::string{argv[2]}, std::string{argv[3]}};
-    finder.process();
-}
+} // namespace chessengine::mate_in_x
