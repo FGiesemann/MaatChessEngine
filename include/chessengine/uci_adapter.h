@@ -177,6 +177,13 @@ public:
         info.depth = search_stats.depth.value;
         info.nodes = search_stats.nodes;
         info.time = search_stats.elapsed_time.count();
+        auto score = search_stats.best_move.score;
+        info.score = chessuci::score_info{};
+        if (is_decisive_score(score)) {
+            info.score->mate = ply_to_mate(score).value;
+        } else {
+            info.score->cp = score.value;
+        }
         log_info_stream() << "search progress " << to_string(info.currmove.value()) << ", depth " << info.depth.value() << ", nodes " << info.nodes.value() << "; time "
                           << info.time.value() << "ms";
         m_handler.send_info(info);
