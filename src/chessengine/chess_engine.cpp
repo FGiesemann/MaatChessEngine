@@ -25,16 +25,14 @@ auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
     m_search_stats.depth = m_config.search_config.iterative_deepening ? Depth{1} : stop_params.max_search_depth;
     m_best_move = {};
     while (!should_stop()) {
-        auto best_move = search_position(m_search_stats.depth);
-        if (is_winning_score(best_move.score)) {
-            m_best_move = best_move;
-            break;
-        }
-        m_best_move = best_move;
+        m_best_move = search_position(m_search_stats.depth);
         if (m_search_progress_callback) {
-            m_search_stats.best_move = best_move;
+            m_search_stats.best_move = m_best_move;
             m_search_stats.elapsed_time = search_time();
             m_search_progress_callback(m_search_stats);
+        }
+        if (is_winning_score(m_best_move.score)) {
+            break;
         }
         m_search_stats.depth += Depth::Step;
     }
@@ -48,8 +46,6 @@ auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
 }
 
 auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
-    m_color_to_evaluate = m_position.side_to_move();
-
     chesscore::Move best_move{};
     auto best_value = Score::NegInfinity;
     const auto moves = moves_to_search(m_config.search_config.search_pv_first && depth > Depth::Step);
@@ -76,15 +72,16 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
 }
 
 auto ChessEngine::search_position(Depth depth, Bounds bounds, bool maximizing_player) -> Score {
-    m_search_stats.nodes += 1;
     if ((depth == Depth::Zero) || should_stop()) {
-        return m_evaluator.evaluate(m_position, m_color_to_evaluate);
-    }
-    const auto moves = moves_to_search();
-    if (moves.empty()) {
-        return m_evaluator.evaluate(m_position, m_color_to_evaluate);
+        return m_evaluator.evaluate(m_position, other_color(m_position.side_to_move()));
     }
 
+    const auto moves = moves_to_search();
+    if (moves.empty()) {
+        return m_evaluator.evaluate(m_position, other_color(m_position.side_to_move()));
+    }
+
+    m_search_stats.nodes += 1;
     if (maximizing_player) {
         auto best_value = Score::NegInfinity;
         for (const auto &move : moves) {
