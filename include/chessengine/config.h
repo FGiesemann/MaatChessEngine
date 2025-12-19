@@ -67,6 +67,9 @@ struct PieceSquareTable {
  */
 class EvaluatorConfig {
 public:
+    bool use_material_balance{true};
+    bool use_piece_square_tables{false};
+
     /**
      * \brief The scores for each piece type.
      *

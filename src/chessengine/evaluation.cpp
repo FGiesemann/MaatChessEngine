@@ -11,7 +11,14 @@ auto Evaluator::evaluate(const chesscore::Position &position, chesscore::Color c
     if (is_mate(position)) {
         return color == position.side_to_move() ? -Score::Mate : Score::Mate;
     }
-    return countup_material(position, color) - countup_material(position, chesscore::other_color(color)) + evaluate_pieces_on_squares(position, color);
+    Score score{0};
+    if (m_config.use_material_balance) {
+        score += countup_material(position, color) - countup_material(position, chesscore::other_color(color));
+    }
+    if (m_config.use_piece_square_tables) {
+        score += evaluate_pieces_on_squares(position, color);
+    }
+    return score;
 }
 
 auto Evaluator::evaluate(const chesscore::Move &move) const -> Score {
