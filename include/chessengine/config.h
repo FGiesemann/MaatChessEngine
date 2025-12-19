@@ -201,7 +201,12 @@ public:
      * \param middlegame_factor Factor for weighting the middle game table vs. end game table (1.0 -> middle game; 0.0 -> end game).
      * \return Value for the king on the given square.
      */
-    auto king_on_square_value(const chesscore::Square &square, chesscore::Color color, float middlegame_factor = 1.0F) const -> Score;
+    auto king_on_square_value(const chesscore::Square &square, chesscore::Color color, float middlegame_factor = 1.0F) const -> Score {
+        const auto lookup_square = color == chesscore::Color::White ? square : square.mirrored();
+        const auto middlegame_value = piece_square_tables[6].value(lookup_square).value;
+        const auto endgame_value = piece_square_tables[7].value(lookup_square).value;
+        return Score{static_cast<Score::value_type>(middlegame_value * middlegame_factor + endgame_value * (1.0F - middlegame_factor))};
+    }
 
     auto empty_board_value() const -> Score { return Score{0}; }
 
