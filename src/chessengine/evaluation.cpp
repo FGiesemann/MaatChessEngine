@@ -62,7 +62,7 @@ auto Evaluator::evaluate_pieces_on_squares(const chesscore::Position &position, 
 
 auto Evaluator::get_capture_score(const chesscore::Move &move) const -> Score {
     if (move.is_capture()) {
-        return m_config.piece_value(move.captured.value().type) - m_config.piece_value(move.piece.type);
+        return m_config.piece_value(move.captured.value().type);
     }
     return Score{0};
 }
