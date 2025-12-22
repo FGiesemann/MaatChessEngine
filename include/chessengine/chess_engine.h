@@ -166,6 +166,7 @@ private:
     std::thread m_search_thread{};                        ///< Thread for the search.
     SearchStats m_search_stats{};                         ///< Statistics of the last search.
     std::mutex m_stats_mutex;                             ///< Mutex protecting access to the search statistics.
+    chesscore::Color m_color_to_evaluate{};               //< The player from who's perspective to evaluate the position.
     EvaluatedMove m_best_move{};                          ///< The best move found so far.
     SearchEndedCallback m_search_ended_callback{};        ///< Callback for search end.
     SearchProgressCalback m_search_progress_callback{};   ///< Callback for search progress.
