@@ -22,7 +22,17 @@ auto Evaluator::evaluate(const chesscore::Position &position, chesscore::Color c
 }
 
 auto Evaluator::evaluate(const chesscore::Move &move) const -> Score {
-    return get_capture_score(move) + get_promotion_score(move) + get_piece_movement_score(move);
+    Score score{0};
+    if (m_config.use_capture_bonus) {
+        score += get_capture_score(move);
+    }
+    if (m_config.use_promotion_bonus) {
+        score += get_promotion_score(move);
+    }
+    if (m_config.use_piece_square_tables) {
+        score += get_piece_movement_score(move);
+    }
+    return score;
 }
 
 auto Evaluator::is_mate(const chesscore::Position &position) -> bool {
