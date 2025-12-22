@@ -88,6 +88,20 @@ public:
         }
         log_internal("DBG ", message);
     }
+
+    auto log_search(const std::string &message) -> void {
+        if (!m_enabled) {
+            return;
+        }
+        log_internal("SRCH", message);
+    }
+
+    auto log_evaluation(const std::string &message) -> void {
+        if (!m_enabled) {
+            return;
+        }
+        log_internal("EVAL", message);
+    }
 private:
     bool m_enabled{false};
     std::ofstream m_file;
@@ -152,6 +166,14 @@ inline auto log_debug(const std::string &msg) -> void {
     chessengine::Logger::instance().log_debug(msg);
 }
 
+inline auto log_search(const std::string &msg) -> void {
+    chessengine::Logger::instance().log_search(msg);
+}
+
+inline auto log_evaluation(const std::string &msg) -> void {
+    chessengine::Logger::instance().log_evaluation(msg);
+}
+
 inline auto log_debug_stream() -> chessengine::LogStream {
     return chessengine::LogStream(&chessengine::Logger::log_debug);
 }
@@ -170,6 +192,14 @@ inline auto log_uci_in_stream() -> chessengine::LogStream {
 
 inline auto log_uci_out_stream() -> chessengine::LogStream {
     return chessengine::LogStream(&chessengine::Logger::log_uci_out);
+}
+
+inline auto log_search_stream() -> chessengine::LogStream {
+    return chessengine::LogStream(&chessengine::Logger::log_search);
+}
+
+inline auto log_evaluation_stream() -> chessengine::LogStream {
+    return chessengine::LogStream(&chessengine::Logger::log_evaluation);
 }
 
 } // namespace chessengine

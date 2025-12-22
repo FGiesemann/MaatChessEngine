@@ -6,12 +6,13 @@
 #ifndef CHESSENGINE_TYPES_H
 #define CHESSENGINE_TYPES_H
 
+#include <chesscore/move.h>
+
 #include <chrono>
 #include <compare>
 #include <cstdint>
 #include <functional>
-
-#include <chesscore/move.h>
+#include <iostream>
 
 namespace chessengine {
 
@@ -41,6 +42,11 @@ struct StrongType {
      */
     [[nodiscard]] constexpr std::strong_ordering operator<=>(const StrongType &other) const = default;
 };
+
+template<typename T, typename Tag>
+std::ostream &operator<<(std::ostream &os, const StrongType<T, Tag> &type) {
+    return os << type.value;
+}
 
 /**
  * \brief The evaluation score for a chess position.
