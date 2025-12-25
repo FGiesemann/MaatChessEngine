@@ -67,7 +67,7 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
         log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move());
         log_indent();
         m_position.make_move(move);
-        auto value = search_position(depth - Depth::Step, Bounds{}, false);
+        auto value = -search_position(depth - Depth::Step, Bounds{});
         log_unindent();
         if (is_winning_score(value)) {
             value = value - Depth::Step;
@@ -90,16 +90,16 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
     return {.move = best_move, .score = best_value};
 }
 
-auto ChessEngine::search_position(Depth depth, Bounds bounds, bool maximizing_player) -> Score {
+auto ChessEngine::search_position(Depth depth, Bounds bounds) -> Score {
     if ((depth == Depth::Zero) || should_stop()) {
-        const auto eval = m_evaluator.evaluate(m_position, m_color_to_evaluate);
+        const auto eval = m_evaluator.evaluate(m_position, m_position.side_to_move());
         log_search_stream() << "Search stopped by depth. Position evaluation: " << eval;
         return eval;
     }
 
     const auto moves = moves_to_search();
     if (moves.empty()) {
-        const auto eval = m_evaluator.evaluate(m_position, m_color_to_evaluate);
+        const auto eval = m_evaluator.evaluate(m_position, m_position.side_to_move());
         log_search_stream() << "No moves to search. Position evaluation: " << eval;
         return eval;
     }
@@ -107,53 +107,29 @@ auto ChessEngine::search_position(Depth depth, Bounds bounds, bool maximizing_pl
     log_search_stream() << "Searching " << moves.size() << " moves for " << to_string(m_position.side_to_move()) << ": " << to_string(moves);
 
     m_search_stats.nodes += 1;
-    if (maximizing_player) {
-        auto best_value = Score::NegInfinity;
-        for (const auto &move : moves) {
-            log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " (" << (maximizing_player ? "max)" : "min)");
-            log_indent();
-            m_position.make_move(move);
-            auto value = search_position(depth - Depth::Step, bounds, false);
-            log_unindent();
-            if (is_winning_score(value)) {
-                value = value - Depth::Step;
-            } else if (is_losing_score(value)) {
-                value = value + Depth::Step;
-            }
-            best_value = std::max(best_value, value);
-            m_position.unmake_move(move);
-            bounds.alpha = std::max(bounds.alpha, best_value);
-            if (m_config.minimax_config.use_alpha_beta_pruning && (bounds.beta <= bounds.alpha)) {
-                log_search("Cancelling search (alpha)");
-                m_search_stats.cutoffs += 1;
-                break;
-            }
+
+    auto best_value = Score::NegInfinity;
+    for (const auto &move : moves) {
+        log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move());
+        log_indent();
+        m_position.make_move(move);
+        auto value = -search_position(depth - Depth::Step, bounds.swap());
+        log_unindent();
+        if (is_winning_score(value)) {
+            value = value - Depth::Step;
+        } else if (is_losing_score(value)) {
+            value = value + Depth::Step;
         }
-        return best_value;
-    } else {
-        auto best_value = Score::Infinity;
-        for (const auto &move : moves) {
-            log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " (" << (maximizing_player ? "max)" : "min)");
-            log_indent();
-            m_position.make_move(move);
-            auto value = search_position(depth - Depth::Step, bounds, true);
-            log_unindent();
-            if (is_winning_score(value)) {
-                value = value - Depth::Step;
-            } else if (is_losing_score(value)) {
-                value = value + Depth::Step;
-            }
-            best_value = std::min(best_value, value);
-            m_position.unmake_move(move);
-            bounds.beta = std::min(bounds.beta, best_value);
-            if (m_config.minimax_config.use_alpha_beta_pruning && (bounds.beta <= bounds.alpha)) {
-                log_search("Cancelling search (beta)");
-                m_search_stats.cutoffs += 1;
-                break;
-            }
+        best_value = std::max(best_value, value);
+        m_position.unmake_move(move);
+        bounds.alpha = std::max(bounds.alpha, best_value);
+        if (m_config.minimax_config.use_alpha_beta_pruning && (bounds.beta <= bounds.alpha)) {
+            log_search("Cancelling search (alpha)");
+            m_search_stats.cutoffs += 1;
+            break;
         }
-        return best_value;
     }
+    return best_value;
 }
 
 auto ChessEngine::moves_to_search(bool search_principal_variation_first) const -> chesscore::MoveList {
@@ -200,7 +176,6 @@ auto ChessEngine::stop_search() -> void {
 
 auto ChessEngine::set_position(const chesscore::Position &position) -> void {
     m_position = position;
-    m_color_to_evaluate = m_position.side_to_move();
 }
 
 auto ChessEngine::play_move(const chesscore::Move &move) -> void {

@@ -166,7 +166,6 @@ private:
     std::thread m_search_thread{};                        ///< Thread for the search.
     SearchStats m_search_stats{};                         ///< Statistics of the last search.
     std::mutex m_stats_mutex;                             ///< Mutex protecting access to the search statistics.
-    chesscore::Color m_color_to_evaluate{};               //< The player from who's perspective to evaluate the position.
     EvaluatedMove m_best_move{};                          ///< The best move found so far.
     SearchEndedCallback m_search_ended_callback{};        ///< Callback for search end.
     SearchProgressCalback m_search_progress_callback{};   ///< Callback for search progress.
@@ -185,7 +184,7 @@ private:
     auto should_stop() const -> bool;
 
     auto search_position(Depth depth) -> EvaluatedMove;
-    auto search_position(Depth depth, Bounds bounds, bool maximizing_player) -> Score;
+    auto search_position(Depth depth, Bounds bounds) -> Score;
     auto moves_to_search(bool search_principal_variation_first = false) const -> chesscore::MoveList;
 
     auto sort_moves(chesscore::MoveList &moves) const -> void;
