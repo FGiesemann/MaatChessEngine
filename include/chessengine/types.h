@@ -54,6 +54,7 @@ std::ostream &operator<<(std::ostream &os, const StrongType<T, Tag> &type) {
 struct [[nodiscard]] Score : public StrongType<std::int16_t, struct ScoreTag> {
     using StrongType::StrongType;
 
+    constexpr auto operator-() const -> Score { return Score{static_cast<value_type>(-value)}; }
     constexpr auto operator+=(Score other) -> Score & {
         value = static_cast<value_type>(value + other.value);
         return *this;
@@ -80,6 +81,8 @@ struct [[nodiscard]] Score : public StrongType<std::int16_t, struct ScoreTag> {
 struct Bounds {
     Score alpha{Score::NegInfinity}; ///< α bound
     Score beta{Score::Infinity};     ///< β bound
+
+    auto swap() -> Bounds { return {-beta, -alpha}; }
 };
 
 /**
@@ -125,17 +128,6 @@ struct [[nodiscard]] Depth : public StrongType<std::int16_t, struct DepthTag> {
     static const Depth Infinite;     ///< Very large depth, nearly infinite.
     static const Depth MaxMateDepth; ///< The maximum depth in the search for a mate.
 };
-
-/**
- * \brief Negation operator.
- *
- * Negates a Score.
- * \param score The score.
- * \return The negated score.
- */
-[[nodiscard]] constexpr auto operator-(Score score) -> Score {
-    return Score{static_cast<Score::value_type>(-score.value)};
-}
 
 /**
  * \brief Addition operator.
