@@ -13,6 +13,7 @@ struct Parameters {
     std::string log_file;
     int thread_count{1};
     std::string first_test_id{""};
+    bool debug{false};
 };
 
 auto read_arguments(int argc, const char *argv[]) -> Parameters {
@@ -25,6 +26,8 @@ auto read_arguments(int argc, const char *argv[]) -> Parameters {
             params.thread_count = std::stoi(arg.substr(10));
         } else if (arg.starts_with("--first-test=")) {
             params.first_test_id = arg.substr(13);
+        } else if (arg.starts_with("--debug")) {
+            params.debug = true;
         } else {
             params.input_file = arg;
         }
@@ -60,6 +63,9 @@ auto main(int argc, const char *argv[]) -> int {
     }
     if (params.thread_count > 1) {
         test_runner.set_threads(params.thread_count);
+    }
+    if (params.debug) {
+        test_runner.enable_debug();
     }
 
     test_runner.run_tests(params.input_file, params.first_test_id);

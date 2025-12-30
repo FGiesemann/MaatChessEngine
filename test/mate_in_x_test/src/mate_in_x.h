@@ -8,6 +8,7 @@
 
 #include <chesscore/epd.h>
 #include <chessengine/config.h>
+#include <chessengine/logger.h>
 #include <chessengine/types.h>
 
 #include <fstream>
@@ -31,6 +32,7 @@ public:
     auto set_log(const std::string &log_file_path) -> void;
     auto set_threads(int thread_count) -> void { m_max_threads = thread_count; }
     auto set_config(const chessengine::Config &config) -> void { m_base_config = config; }
+    auto enable_debug() -> void { Logger::instance().enable("engine_debug.log"); }
     auto run_tests(const std::string &file_path, const std::string &first_test_id = "") -> void;
 
     auto test_count() const -> std::size_t { return m_tests.size(); }
