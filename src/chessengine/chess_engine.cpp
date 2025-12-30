@@ -59,35 +59,37 @@ auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
 }
 
 auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
-    chesscore::Move best_move{};
-    auto best_value = Score::NegInfinity;
+    EvaluatedMove best_move{.move = {}, .score = Score::NegInfinity};
+    Bounds bounds{};
     const auto moves = moves_to_search(m_config.search_config.search_pv_first && depth > Depth::Step);
     log_search_stream() << "Searching " << moves.size() << " moves for " << to_string(m_position.side_to_move()) << ": " << to_string(moves);
     for (const auto &move : moves) {
         log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move());
         log_indent();
         m_position.make_move(move);
-        auto value = -search_position(depth - Depth::Step, Bounds{});
+        auto value = -search_position(depth - Depth::Step, bounds.swap());
+        m_position.unmake_move(move);
         log_unindent();
         if (is_winning_score(value)) {
             value = value - Depth::Step;
         } else if (is_losing_score(value)) {
             value = value + Depth::Step;
         }
-        m_position.unmake_move(move);
-        if (value > best_value) {
+        if (value > best_move.score) {
             log_search_stream() << "Found new best move for " << to_string(m_position.side_to_move()) << ": " << to_string(move) << " (" << value << ") replacing "
-                                << to_string(best_move) << " (" << best_value << ")";
-            best_move = move;
-            best_value = value;
-            if (!m_config.search_config.iterative_deepening) {
-                m_best_move = {best_move, best_value};
-            }
+                                << to_string(best_move.move) << " (" << best_move.score << ")";
+            best_move = {.move = move, .score = value};
+        }
+        bounds.alpha = std::max(bounds.alpha, best_move.score);
+        if (m_config.minimax_config.use_alpha_beta_pruning && (bounds.beta <= bounds.alpha)) {
+            log_search("Cancelling search");
+            m_search_stats.cutoffs += 1;
+            break;
         }
     }
     m_search_stats.nodes += 1;
 
-    return {.move = best_move, .score = best_value};
+    return best_move;
 }
 
 auto ChessEngine::search_position(Depth depth, Bounds bounds) -> Score {
@@ -105,6 +107,7 @@ auto ChessEngine::search_position(Depth depth, Bounds bounds) -> Score {
     }
 
     log_search_stream() << "Searching " << moves.size() << " moves for " << to_string(m_position.side_to_move()) << ": " << to_string(moves);
+    log_search_stream() << "Alpha = " << bounds.alpha << " Beta = " << bounds.beta;
 
     m_search_stats.nodes += 1;
 
@@ -114,6 +117,7 @@ auto ChessEngine::search_position(Depth depth, Bounds bounds) -> Score {
         log_indent();
         m_position.make_move(move);
         auto value = -search_position(depth - Depth::Step, bounds.swap());
+        m_position.unmake_move(move);
         log_unindent();
         if (is_winning_score(value)) {
             value = value - Depth::Step;
@@ -121,10 +125,12 @@ auto ChessEngine::search_position(Depth depth, Bounds bounds) -> Score {
             value = value + Depth::Step;
         }
         best_value = std::max(best_value, value);
-        m_position.unmake_move(move);
+        if (bounds.alpha < best_value) {
+            log_search_stream() << "Updated alpha from " << bounds.alpha << " to " << best_value << "; beta = " << bounds.beta;
+        }
         bounds.alpha = std::max(bounds.alpha, best_value);
         if (m_config.minimax_config.use_alpha_beta_pruning && (bounds.beta <= bounds.alpha)) {
-            log_search("Cancelling search (alpha)");
+            log_search("Cancelling search");
             m_search_stats.cutoffs += 1;
             break;
         }
@@ -139,6 +145,7 @@ auto ChessEngine::moves_to_search(bool search_principal_variation_first) const -
         if (search_principal_variation_first) {
             auto it = std::find(moves.begin(), moves.end(), m_best_move.move);
             if (it != moves.end()) {
+                log_search("Move ordering: moving best move of previous iteration to front");
                 std::rotate(moves.begin(), it, it + 1);
             }
         }
