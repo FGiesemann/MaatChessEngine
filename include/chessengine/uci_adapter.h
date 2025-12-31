@@ -173,10 +173,13 @@ public:
 
     auto engine_search_progress(SearchStats search_stats) -> void {
         chessuci::search_info info{};
+        info.pv.push_back(chessuci::UCIMove{search_stats.best_move.move});
         info.currmove = chessuci::UCIMove{search_stats.best_move.move};
         info.depth = search_stats.depth.value;
+        info.seldepth = search_stats.depth.value;
         info.nodes = search_stats.nodes;
         info.time = search_stats.elapsed_time.count();
+        info.nps = search_stats.calculate_nps();
         auto score = search_stats.best_move.score;
         info.score = chessuci::score_info{};
         if (is_decisive_score(score)) {
