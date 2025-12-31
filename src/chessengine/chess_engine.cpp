@@ -107,13 +107,12 @@ auto ChessEngine::search_position(Depth depth, Bounds bounds) -> Score {
     if (moves.empty()) {
         const auto eval = m_evaluator.evaluate(m_position, m_position.side_to_move());
         log_search_stream() << "No moves to search. Position evaluation: " << eval;
+        m_search_stats.nodes += 1;
         return eval;
     }
 
     log_search_stream() << "Searching " << moves.size() << " moves for " << to_string(m_position.side_to_move()) << ": " << to_string(moves);
     log_search_stream() << "Alpha = " << bounds.alpha << " Beta = " << bounds.beta;
-
-    m_search_stats.nodes += 1;
 
     auto best_value = Score::NegInfinity;
     for (const auto &move : moves) {
@@ -143,6 +142,7 @@ auto ChessEngine::search_position(Depth depth, Bounds bounds) -> Score {
             break;
         }
     }
+    m_search_stats.nodes += 1;
     return best_value;
 }
 
