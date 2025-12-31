@@ -64,12 +64,13 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
     const auto moves = moves_to_search(m_config.search_config.search_pv_first && depth > Depth::Step);
     log_search_stream() << "Searching " << moves.size() << " moves for " << to_string(m_position.side_to_move()) << ": " << to_string(moves);
     for (const auto &move : moves) {
-        log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move());
+        log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " at depth " << depth;
         log_indent();
         m_position.make_move(move);
         auto value = -search_position(depth - Depth::Step, bounds.swap());
         m_position.unmake_move(move);
         log_unindent();
+        log_search_stream() << "Move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " evaluated to " << value;
         if (is_winning_score(value)) {
             value = value - Depth::Step;
         } else if (is_losing_score(value)) {
@@ -86,6 +87,9 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
             m_search_stats.cutoffs += 1;
             break;
         }
+        if (should_stop()) {
+            break;
+        }
     }
     m_search_stats.nodes += 1;
 
@@ -93,7 +97,7 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
 }
 
 auto ChessEngine::search_position(Depth depth, Bounds bounds) -> Score {
-    if ((depth == Depth::Zero) || should_stop()) {
+    if ((depth == Depth::Zero)) {
         const auto eval = m_evaluator.evaluate(m_position, m_position.side_to_move());
         log_search_stream() << "Search stopped by depth. Position evaluation: " << eval;
         return eval;
@@ -113,12 +117,16 @@ auto ChessEngine::search_position(Depth depth, Bounds bounds) -> Score {
 
     auto best_value = Score::NegInfinity;
     for (const auto &move : moves) {
-        log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move());
+        if (should_stop()) {
+            break;
+        }
+        log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " at depth " << depth;
         log_indent();
         m_position.make_move(move);
         auto value = -search_position(depth - Depth::Step, bounds.swap());
         m_position.unmake_move(move);
         log_unindent();
+        log_search_stream() << "Move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " evaluated to " << value;
         if (is_winning_score(value)) {
             value = value - Depth::Step;
         } else if (is_losing_score(value)) {
