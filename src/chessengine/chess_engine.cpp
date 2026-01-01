@@ -29,24 +29,30 @@ auto ChessEngine::search(const StopParameters &stop_params) -> EvaluatedMove {
     m_search_start = std::chrono::steady_clock::now();
     m_stopping_params = stop_params;
     // If iterative_deepening is not used, the max_search_depth should be set!
-    m_search_stats.depth = m_config.search_config.iterative_deepening ? Depth{1} : stop_params.max_search_depth;
+    auto search_depth = m_config.search_config.iterative_deepening ? Depth{1} : stop_params.max_search_depth;
     m_best_move = {};
-    while (!should_stop()) {
-        log_search_stream() << "Searching for depth: " << m_search_stats.depth;
-        log_indent();
-        m_best_move = search_position(m_search_stats.depth);
-        log_unindent();
-        log_search_stream() << "Search for depth " << m_search_stats.depth << " finishd with best move: " << to_string(m_best_move.move) << " (" << m_best_move.score << ')';
-        if (m_search_progress_callback) {
-            m_search_stats.best_move = m_best_move;
-            m_search_stats.elapsed_time = search_time();
-            m_search_progress_callback(m_search_stats);
+    try {
+        while (true) {
+            check_stop();
+            log_search_stream() << "Searching for depth: " << search_depth;
+            log_indent();
+            m_best_move = search_position(search_depth);
+            log_unindent();
+            log_search_stream() << "Search for depth " << search_depth << " finishd with best move: " << to_string(m_best_move.move) << " (" << m_best_move.score << ')';
+            m_search_stats.depth = search_depth;
+            if (m_search_progress_callback) {
+                m_search_stats.best_move = m_best_move;
+                m_search_stats.elapsed_time = search_time();
+                m_search_progress_callback(m_search_stats);
+            }
+            if (is_winning_score(m_best_move.score)) {
+                log_search_stream() << "Stopping search at winning score " << m_best_move.score;
+                break;
+            }
+            search_depth += Depth::Step;
         }
-        if (is_winning_score(m_best_move.score)) {
-            log_search_stream() << "Stopping search at winning score " << m_best_move.score;
-            break;
-        }
-        m_search_stats.depth += Depth::Step;
+    } catch (const SearchAborted &e) {
+        log_search_stream() << "Search stopped: " << e.what();
     }
 
     m_search_running = false;
@@ -64,22 +70,23 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
     const auto moves = moves_to_search(m_config.search_config.search_pv_first && depth > Depth::Step);
     log_search_stream() << "Searching " << moves.size() << " moves for " << to_string(m_position.side_to_move()) << ": " << to_string(moves);
     for (const auto &move : moves) {
-        log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " at depth " << depth;
-        log_indent();
-        m_position.make_move(move);
-        auto value = -search_position(depth - Depth::Step, bounds.swap());
-        m_position.unmake_move(move);
-        log_unindent();
-        log_search_stream() << "Move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " evaluated to " << value;
-        if (is_winning_score(value)) {
-            value = value - Depth::Step;
-        } else if (is_losing_score(value)) {
-            value = value + Depth::Step;
-        }
-        if (value > best_move.score) {
-            log_search_stream() << "Found new best move for " << to_string(m_position.side_to_move()) << ": " << to_string(move) << " (" << value << ") replacing "
-                                << to_string(best_move.move) << " (" << best_move.score << ")";
-            best_move = {.move = move, .score = value};
+        {
+            log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " at depth " << depth;
+            log_indent();
+            MoveScope scope{m_position, move};
+            auto value = -search_position(depth - Depth::Step, bounds.swap());
+            log_unindent();
+            log_search_stream() << "Move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " evaluated to " << value;
+            if (is_winning_score(value)) {
+                value = value - Depth::Step;
+            } else if (is_losing_score(value)) {
+                value = value + Depth::Step;
+            }
+            if (value > best_move.score) {
+                log_search_stream() << "Found new best move for " << to_string(m_position.side_to_move()) << ": " << to_string(move) << " (" << value << ") replacing "
+                                    << to_string(best_move.move) << " (" << best_move.score << ")";
+                best_move = {.move = move, .score = value};
+            }
         }
         bounds.alpha = std::max(bounds.alpha, best_move.score);
         if (m_config.minimax_config.use_alpha_beta_pruning && (bounds.beta <= bounds.alpha)) {
@@ -87,9 +94,7 @@ auto ChessEngine::search_position(Depth depth) -> EvaluatedMove {
             m_search_stats.cutoffs += 1;
             break;
         }
-        if (should_stop()) {
-            break;
-        }
+        check_stop();
     }
     m_search_stats.nodes += 1;
 
@@ -116,24 +121,23 @@ auto ChessEngine::search_position(Depth depth, Bounds bounds) -> Score {
 
     auto best_value = Score::NegInfinity;
     for (const auto &move : moves) {
-        if (should_stop()) {
-            break;
-        }
+        check_stop();
         log_search_stream() << "Checking move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " at depth " << depth;
-        log_indent();
-        m_position.make_move(move);
-        auto value = -search_position(depth - Depth::Step, bounds.swap());
-        m_position.unmake_move(move);
-        log_unindent();
-        log_search_stream() << "Move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " evaluated to " << value;
-        if (is_winning_score(value)) {
-            value = value - Depth::Step;
-        } else if (is_losing_score(value)) {
-            value = value + Depth::Step;
-        }
-        best_value = std::max(best_value, value);
-        if (bounds.alpha < best_value) {
-            log_search_stream() << "Updated alpha from " << bounds.alpha << " to " << best_value << "; beta = " << bounds.beta;
+        {
+            log_indent();
+            MoveScope scope{m_position, move};
+            auto value = -search_position(depth - Depth::Step, bounds.swap());
+            log_unindent();
+            log_search_stream() << "Move " << to_string(move) << " for " << to_string(m_position.side_to_move()) << " evaluated to " << value;
+            if (is_winning_score(value)) {
+                value = value - Depth::Step;
+            } else if (is_losing_score(value)) {
+                value = value + Depth::Step;
+            }
+            best_value = std::max(best_value, value);
+            if (bounds.alpha < best_value) {
+                log_search_stream() << "Updated alpha from " << bounds.alpha << " to " << best_value << "; beta = " << bounds.beta;
+            }
         }
         bounds.alpha = std::max(bounds.alpha, best_value);
         if (m_config.minimax_config.use_alpha_beta_pruning && (bounds.beta <= bounds.alpha)) {
@@ -209,28 +213,30 @@ auto ChessEngine::search_time() const -> std::chrono::milliseconds {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_search_start);
 }
 
-auto ChessEngine::should_stop() const -> bool {
+auto ChessEngine::check_stop() const -> void {
+    static int check_counter{0};
+
     if (m_stop_requested) {
         log_search("STOPPING. Stop requested");
-        return true;
+        throw SearchAborted("user request");
     }
     if (m_stopping_params.max_search_depth > Depth::Zero && m_search_stats.depth > m_stopping_params.max_search_depth) {
         log_search("STOPPING. Max search depth reached");
-        return true;
+        throw SearchAborted("max search depth reached");
     }
     if (m_stopping_params.max_search_nodes > 0 && m_search_stats.nodes > m_stopping_params.max_search_nodes) {
         log_search("STOPPING. Max search nodes reached");
-        return true;
+        throw SearchAborted("max search nodes reached");
     }
-    if (m_stopping_params.max_search_time.count() > 0) {
+    if ((m_stopping_params.max_search_time.count() > 0) && (++check_counter > stop_check_interval)) {
+        check_counter = 0;
         const auto search_duration = search_time();
         const auto time_exceeded = search_duration > m_stopping_params.max_search_time;
         if (time_exceeded) {
             log_search("STOPPING. Max search time exceeded");
+            throw SearchAborted("max search time exceeded");
         }
-        return time_exceeded;
     }
-    return false;
 }
 
 } // namespace chessengine
