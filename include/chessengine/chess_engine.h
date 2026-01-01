@@ -6,17 +6,32 @@
 #ifndef CHESS_ENGINE_CHESS_ENGINE_H
 #define CHESS_ENGINE_CHESS_ENGINE_H
 
+#include "chessengine/config.h"
+#include "chessengine/evaluation.h"
+
+#include <chesscore/position.h>
+
 #include <atomic>
+#include <exception>
 #include <filesystem>
 #include <mutex>
 #include <thread>
 
-#include <chesscore/position.h>
-
-#include "chessengine/config.h"
-#include "chessengine/evaluation.h"
-
 namespace chessengine {
+
+class SearchAborted : public std::runtime_error {
+public:
+    explicit SearchAborted(const std::string &message) : std::runtime_error{message} {}
+};
+
+class MoveScope {
+public:
+    explicit MoveScope(chesscore::Position &position, const chesscore::Move &move) : m_position{position}, m_move{move} { m_position.make_move(move); }
+    ~MoveScope() { m_position.unmake_move(m_move); }
+private:
+    chesscore::Position &m_position;
+    const chesscore::Move &m_move;
+};
 
 class ChessEngine {
 public:
@@ -172,16 +187,17 @@ private:
     StopParameters m_stopping_params{};                   ///< Parameters for the stopping criteria.
     std::chrono::steady_clock::time_point m_search_start; ///< Start of the search.
 
-    static constexpr std::uint64_t stop_check_interval{1000};
+    static constexpr int stop_check_interval{2048};
 
     /**
      * \brief Checks, if a running search should be stopped.
      *
      * There might be different reasons why a search should stop as soon as
      * possible. These include a request by the user or timing constraints.
-     * \return If the search should be terminated as soon as possible.
+     * If the search should be stopped, the function throws a SearchAborted
+     * exception.
      */
-    auto should_stop() const -> bool;
+    auto check_stop() const -> void;
 
     auto search_position(Depth depth) -> EvaluatedMove;
     auto search_position(Depth depth, Bounds bounds) -> Score;
