@@ -80,6 +80,8 @@ auto MateInXTest::process_tests(const std::string &first_test_id) -> void {
     for (auto &future : futures) {
         log_result(future.get());
     }
+
+    print_summary();
 }
 
 auto MateInXTest::perform_test(const chesscore::EpdRecord &test) -> MateInXResult {
@@ -110,7 +112,7 @@ auto MateInXTest::log_result(const MateInXResult &result) -> void {
     if (!result.found_mate) {
         log_message << "NO MATE\n";
     } else {
-        log_message << std::format("{:>13} @ {:>2} ", to_string(result.found_move), result.found_depth.value);
+        log_message << std::format("{:>9} @ {:>2} ", to_string(result.found_move), result.found_depth.value);
         if (!chesscore::move_list_contains(result.expected_moves, result.found_move)) {
             log_message << "!! Unexpected move! Expected: "
                         << (result.expected_moves | std::views::transform([&](const auto &move) { return to_string(move); }) | std::views::join_with(std::string{", "}) |
@@ -122,8 +124,16 @@ auto MateInXTest::log_result(const MateInXResult &result) -> void {
             ++m_tests_passed;
         }
     }
-    log_message << " (" << result.search_stats.nodes << " nodes, " << result.search_stats.cutoffs << " cutoffs, " << result.search_stats.elapsed_time.count() << " ms)\n";
+    log_message << " (" << result.search_stats.nodes << " nodes, " << result.search_stats.cutoffs << " cutoffs, " << result.search_stats.elapsed_time.count() << " ms, "
+                << result.search_stats.calculate_nps().value_or(0) << " nps)\n";
     write_log(log_message.str());
+}
+
+auto MateInXTest::print_summary() -> void {
+    write_log(
+        "\nTotal tests: " + std::to_string(m_tests_performed) + "\nTests passed: " + std::to_string(m_tests_passed) +
+        "\nTests failed: " + std::to_string(m_tests_performed - m_tests_passed) + "\n"
+    );
 }
 
 auto MateInXTest::load_tests(const std::string &test_file_path) -> void {

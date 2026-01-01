@@ -250,7 +250,7 @@ struct SearchStats {
     Depth depth;                            ///< Depth reached so far.
     std::chrono::milliseconds elapsed_time; ///< Time spent so far.
 
-    auto calculate_nps() -> std::optional<std::uint64_t> {
+    auto calculate_nps() const -> std::optional<std::uint64_t> {
         const auto ms_count = elapsed_time.count();
         if (ms_count != 0) {
             return nodes * 1000 / ms_count;

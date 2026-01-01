@@ -45,6 +45,7 @@ private:
     auto process_tests(const std::string &first_test_id) -> void;
     auto perform_test(const chesscore::EpdRecord &test) -> MateInXResult;
     auto log_result(const MateInXResult &result) -> void;
+    auto print_summary() -> void;
 
     chesscore::EpdSuite m_tests;
     std::ofstream m_log_file;
