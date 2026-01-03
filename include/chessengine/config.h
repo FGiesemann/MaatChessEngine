@@ -67,10 +67,10 @@ struct PieceSquareTable {
  */
 class EvaluatorConfig {
 public:
-    bool use_material_balance{true};     ///< Count material balance in position evaluation.
-    bool use_piece_square_tables{false}; ///< Use piece-square tables in position and move evaluation.
-    bool use_promotion_bonus{false};     ///< Use additional bonus for pawn promotions in move evaluation.
-    bool use_capture_bonus{false};       ///< Use additional bonus for captures in move evaluation.
+    bool use_material_balance{true};    ///< Count material balance in position evaluation.
+    bool use_piece_square_tables{true}; ///< Use piece-square tables in position and move evaluation.
+    bool use_promotion_bonus{true};     ///< Use additional bonus for pawn promotions in move evaluation.
+    bool use_capture_bonus{false};      ///< Use additional bonus for captures in move evaluation.
 
     /**
      * \brief The scores for each piece type.
