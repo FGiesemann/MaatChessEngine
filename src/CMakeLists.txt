@@ -8,6 +8,7 @@ add_library(ChessEngineLib
     chessengine/uci_adapter.cpp
 )
 add_compiler_warnings(ChessEngineLib)
+add_optimization_settings(ChessEngineLib)
 target_compile_features(ChessEngineLib PUBLIC cxx_std_23)
 target_compile_options(ChessEngineLib PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
 target_include_directories(ChessEngineLib PUBLIC
@@ -23,5 +24,6 @@ add_executable(maat
     app/main.cpp
 )
 add_compiler_warnings(maat)
+add_optimization_settings(maat)
 target_link_libraries(maat PRIVATE ChessEngineLib)
 target_compile_options(maat PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
