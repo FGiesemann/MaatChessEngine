@@ -7,7 +7,17 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
 option(BUILD_TESTING "Build unittests" ON)
 
-include(cmake/compiler_warnings.cmake)
+include(FetchContent)
+FetchContent_Declare(
+    ChessBuild
+    GIT_REPOSITORY https://github.com/FGiesemann/ChessBuild.git
+    GIT_TAG        v0.8.4
+)
+FetchContent_MakeAvailable(ChessBuild)
+message(STATUS "CHESS BUILD MODULE DIR: ${CHESS_BUILD_MODULE_DIR}")
+list(APPEND CMAKE_MODULE_PATH ${CHESS_BUILD_MODULE_DIR})
+include(CompilerWarnings)
+include(CompilerSettings)
 
 find_package(chesscore CONFIG REQUIRED COMPONENTS chesscore)
 find_package(chessgame CONFIG REQUIRED)
