@@ -30,7 +30,7 @@ struct StrongType {
     /**
      * \brief Construct an instance of the strong type with a value.
      *
-     * \param value The value.
+     * \param val The value.
      */
     constexpr explicit StrongType(value_type val = {}) : value{val} {}
 
