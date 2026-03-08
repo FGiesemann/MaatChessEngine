@@ -8,7 +8,7 @@ class ChessEngineConan(ConanFile):
     package_type = "library"
 
     license = "MIT License"
-    author = "Florian Giesemann <florian.giesemann@gmail.com>"
+    author = "Florian Giesemann <fgiesemann@proton.me>"
     url = "https://github.com/FGiesemann/ChessEngine.git"
     homepage = "https://github.com/FGiesemann/ChessEngine"
 
