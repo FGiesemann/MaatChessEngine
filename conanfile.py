@@ -61,5 +61,5 @@ class ChessEngineConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["ChessEngine"]
-        self.cpp_info.set_property("cmake_target_name", "ChessEngine::ChessEngine")
+        self.cpp_info.libs = ["ChessEngineLib"]
+        self.cpp_info.set_property("cmake_target_name", "ChessEngine::ChessEngineLib")

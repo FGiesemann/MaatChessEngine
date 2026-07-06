@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+set(${CMAKE_FIND_PACKAGE_NAME}_FOUND TRUE)
+
+include("${CMAKE_CURRENT_LIST_DIR}/ChessEngineTargets.cmake")
+
+set(chessengine_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include/chessengine")
+set(chessengine_LIBRARY ChessEngine::ChessEngineLib)
