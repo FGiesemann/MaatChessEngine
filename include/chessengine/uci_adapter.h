@@ -194,8 +194,8 @@ public:
 private:
     chessuci::UCIEngineHandler m_handler;
     EngineT m_engine;
-    std::string m_position_setup{};
-    UCIMoveList m_move_list{}; ///< Moves played so far.
+    std::string m_position_setup;
+    UCIMoveList m_move_list; ///< Moves played so far.
     std::condition_variable m_quit_signal;
     std::mutex m_quit_mutex;
 
@@ -245,14 +245,7 @@ private:
 
         const int moves_to_go = go_command.movestogo.value_or(sudden_death_moves);
 
-        long long target_time_ms;
-
-        if (time_left > 0 && moves_to_go > 0) {
-            target_time_ms = time_left / moves_to_go;
-        } else {
-            target_time_ms = 0;
-        }
-
+        long long target_time_ms = (time_left > 0 && moves_to_go > 0) ? time_left / moves_to_go : 0;
         target_time_ms += (increment * 9) / 10;
 
         if (time_left > 0) {
