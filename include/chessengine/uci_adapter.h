@@ -27,9 +27,9 @@ static inline auto position_to_string(const chesscore::Position &position) -> st
     std::ostringstream result;
     const auto &bitboard = position.board();
     result << "  a b c d e f g h\n";
-    for (int rank = chesscore::Rank::max_rank; rank >= chesscore::Rank::min_rank; --rank) {
+    for (int rank = chesscore::Rank::count - 1; rank >= 0; --rank) {
         result << rank << ' ';
-        for (int file = chesscore::File::min_file; file <= chesscore::File::max_file; ++file) {
+        for (int file = 0; file < chesscore::File::count; ++file) {
             const chesscore::Square square{file, rank};
             const auto piece = bitboard.get_piece(square);
             if (piece) {
