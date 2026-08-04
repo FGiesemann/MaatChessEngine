@@ -135,7 +135,7 @@ public:
         const auto &evaluated_move = m_engine.best_move();
         const chessuci::UCIMove move{
             evaluated_move.move.from, evaluated_move.move.to,
-            evaluated_move.move.promoted.has_value() ? std::optional<chesscore::PieceType>{evaluated_move.move.promoted.value().type} : std::nullopt
+            evaluated_move.move.promoted.has_value() ? std::optional<chesscore::PieceType>{evaluated_move.move.promoted.value().type()} : std::nullopt
         };
         chessuci::bestmove_info move_info{.bestmove = move, .pondermove = {}};
         log_uci_out_stream() << "best move " << to_string(move) << "; value " << evaluated_move.score.value;

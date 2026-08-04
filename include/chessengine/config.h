@@ -78,7 +78,7 @@ public:
      * The values have to be given in the same order as the piece types in the
      * chesscore::PieceType enumeration.
      */
-    Score piece_values[6]{Score{100}, Score{500}, Score{300}, Score{300}, Score{900}, Score{0}};
+    Score piece_values[6]{Score{100}, Score{300}, Score{300}, Score{500}, Score{900}, Score{0}};
 
     /**
      * \brief Scores for a piece on a square.
@@ -98,17 +98,6 @@ public:
             Score{ 10}, Score{ 10}, Score{ 20}, Score{ 30}, Score{ 30}, Score{ 20}, Score{ 10}, Score{ 10},
             Score{ 50}, Score{ 50}, Score{ 50}, Score{ 50}, Score{ 50}, Score{ 50}, Score{ 50}, Score{ 50},
             Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}
-        }, 
-        // Rook
-        {
-            Score{  0}, Score{  0}, Score{  0}, Score{  5}, Score{  5}, Score{  0}, Score{ 0}, Score{  0},
-            Score{ -5}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{ -5},
-            Score{ -5}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{ -5},
-            Score{ -5}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{ -5},
-            Score{ -5}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{ -5},
-            Score{ -5}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{ -5},
-            Score{  5}, Score{ 10}, Score{ 10}, Score{ 10}, Score{ 10}, Score{ 10}, Score{10}, Score{  5},
-            Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{  0}
         }, 
         // Knight
         {
@@ -132,6 +121,17 @@ public:
             Score{-10}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{-10},
             Score{-20}, Score{-10}, Score{-10}, Score{-10}, Score{-10}, Score{-10}, Score{-10}, Score{-20}
         },
+        // Rook
+        {
+            Score{  0}, Score{  0}, Score{  0}, Score{  5}, Score{  5}, Score{  0}, Score{ 0}, Score{  0},
+            Score{ -5}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{ -5},
+            Score{ -5}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{ -5},
+            Score{ -5}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{ -5},
+            Score{ -5}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{ -5},
+            Score{ -5}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{ -5},
+            Score{  5}, Score{ 10}, Score{ 10}, Score{ 10}, Score{ 10}, Score{ 10}, Score{10}, Score{  5},
+            Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{  0}, Score{ 0}, Score{  0}
+        }, 
         // Queen
         {
             Score{-20}, Score{-10}, Score{-10}, Score{ -5}, Score{ -5}, Score{-10}, Score{-10}, Score{-20},
@@ -189,8 +189,8 @@ public:
      * \return The value for the given piece on the given square.
      */
     auto piece_on_square_value(chesscore::Piece piece, const chesscore::Square &square) const -> Score {
-        const auto lookup_square = (piece.color == chesscore::Color::White) ? square : square.mirrored();
-        return piece_square_tables[get_index(piece.type)].value(lookup_square);
+        const auto lookup_square = (piece.color() == chesscore::Color::White) ? square : square.mirrored();
+        return piece_square_tables[get_index(piece.type())].value(lookup_square);
     }
 
     /**
@@ -216,9 +216,9 @@ public:
     auto empty_board_value() const -> Score { return Score{0}; }
 
     static_assert(get_index(chesscore::PieceType::Pawn) == 0);
-    static_assert(get_index(chesscore::PieceType::Rook) == 1);
-    static_assert(get_index(chesscore::PieceType::Knight) == 2);
-    static_assert(get_index(chesscore::PieceType::Bishop) == 3);
+    static_assert(get_index(chesscore::PieceType::Knight) == 1);
+    static_assert(get_index(chesscore::PieceType::Bishop) == 2);
+    static_assert(get_index(chesscore::PieceType::Rook) == 3);
     static_assert(get_index(chesscore::PieceType::Queen) == 4);
     static_assert(get_index(chesscore::PieceType::King) == 5);
 };

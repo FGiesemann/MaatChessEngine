@@ -64,18 +64,13 @@ namespace {
 
 auto get_default_config() -> EvaluatorConfig {
     return EvaluatorConfig{
-        .piece_values = {Score{100}, Score{500}, Score{300}, Score{300}, Score{900}, Score{0}},
+        .piece_values = {Score{100}, Score{300}, Score{300}, Score{500}, Score{900}, Score{0}},
         .piece_square_tables = {
             {Score{0},  Score{0},  Score{0},  Score{0},  Score{0},  Score{0},   Score{0},  Score{0},  Score{5},   Score{10}, Score{10}, Score{-20}, Score{-20},
              Score{10}, Score{10}, Score{5},  Score{5},  Score{-5}, Score{-10}, Score{0},  Score{0},  Score{-10}, Score{-5}, Score{5},  Score{0},   Score{0},
              Score{0},  Score{20}, Score{20}, Score{0},  Score{0},  Score{0},   Score{5},  Score{5},  Score{10},  Score{25}, Score{25}, Score{10},  Score{5},
              Score{5},  Score{10}, Score{10}, Score{20}, Score{30}, Score{30},  Score{20}, Score{10}, Score{10},  Score{50}, Score{50}, Score{50},  Score{50},
              Score{50}, Score{50}, Score{50}, Score{50}, Score{0},  Score{0},   Score{0},  Score{0},  Score{0},   Score{0},  Score{0},  Score{0}},
-            {Score{0},  Score{0},  Score{0},  Score{5},  Score{5}, Score{0},  Score{0},  Score{0}, Score{-5}, Score{0}, Score{0},  Score{0},  Score{0},
-             Score{0},  Score{0},  Score{-5}, Score{-5}, Score{0}, Score{0},  Score{0},  Score{0}, Score{0},  Score{0}, Score{-5}, Score{-5}, Score{0},
-             Score{0},  Score{0},  Score{0},  Score{0},  Score{0}, Score{-5}, Score{-5}, Score{0}, Score{0},  Score{0}, Score{0},  Score{0},  Score{0},
-             Score{-5}, Score{-5}, Score{0},  Score{0},  Score{0}, Score{0},  Score{0},  Score{0}, Score{-5}, Score{5}, Score{10}, Score{10}, Score{10},
-             Score{10}, Score{10}, Score{10}, Score{5},  Score{0}, Score{0},  Score{0},  Score{0}, Score{0},  Score{0}, Score{0},  Score{0}},
             {Score{-50}, Score{-40}, Score{-30}, Score{-30}, Score{-30}, Score{-30}, Score{-40}, Score{-50}, Score{-40}, Score{-20}, Score{0},   Score{5},   Score{5},
              Score{0},   Score{-20}, Score{-40}, Score{-30}, Score{5},   Score{10},  Score{15},  Score{15},  Score{10},  Score{5},   Score{-30}, Score{-30}, Score{0},
              Score{15},  Score{20},  Score{20},  Score{15},  Score{0},   Score{-30}, Score{-30}, Score{5},   Score{15},  Score{20},  Score{20},  Score{15},  Score{5},
@@ -86,6 +81,11 @@ auto get_default_config() -> EvaluatorConfig {
              Score{10},  Score{10},  Score{10},  Score{10},  Score{0},   Score{-10}, Score{-10}, Score{5},   Score{5},   Score{10},  Score{10},  Score{5},   Score{5},
              Score{-10}, Score{-10}, Score{0},   Score{5},   Score{10},  Score{10},  Score{5},   Score{0},   Score{-10}, Score{-10}, Score{0},   Score{0},   Score{0},
              Score{0},   Score{0},   Score{0},   Score{-10}, Score{-20}, Score{-10}, Score{-10}, Score{-10}, Score{-10}, Score{-10}, Score{-10}, Score{-20}},
+            {Score{0},  Score{0},  Score{0},  Score{5},  Score{5}, Score{0},  Score{0},  Score{0}, Score{-5}, Score{0}, Score{0},  Score{0},  Score{0},
+             Score{0},  Score{0},  Score{-5}, Score{-5}, Score{0}, Score{0},  Score{0},  Score{0}, Score{0},  Score{0}, Score{-5}, Score{-5}, Score{0},
+             Score{0},  Score{0},  Score{0},  Score{0},  Score{0}, Score{-5}, Score{-5}, Score{0}, Score{0},  Score{0}, Score{0},  Score{0},  Score{0},
+             Score{-5}, Score{-5}, Score{0},  Score{0},  Score{0}, Score{0},  Score{0},  Score{0}, Score{-5}, Score{5}, Score{10}, Score{10}, Score{10},
+             Score{10}, Score{10}, Score{10}, Score{5},  Score{0}, Score{0},  Score{0},  Score{0}, Score{0},  Score{0}, Score{0},  Score{0}},
             {Score{-20}, Score{-10}, Score{-10}, Score{-5},  Score{-5},  Score{-10}, Score{-10}, Score{-20}, Score{-10}, Score{0},   Score{5},   Score{0},  Score{0},
              Score{0},   Score{0},   Score{-10}, Score{-10}, Score{5},   Score{5},   Score{5},   Score{5},   Score{5},   Score{0},   Score{-10}, Score{0},  Score{0},
              Score{5},   Score{5},   Score{5},   Score{5},   Score{0},   Score{-5},  Score{-5},  Score{0},   Score{5},   Score{5},   Score{5},   Score{5},  Score{0},

@@ -42,7 +42,7 @@ auto Evaluator::is_mate(const chesscore::Position &position) -> bool {
 auto Evaluator::countup_material(const chesscore::Position &position, chesscore::Color color) const -> Score {
     Score material{0};
     for (const auto piece_type : chesscore::all_piece_types) {
-        material += m_config.piece_value(piece_type) * position.board().piece_count(chesscore::Piece{.type = piece_type, .color = color});
+        material += m_config.piece_value(piece_type) * position.board().piece_count(chesscore::Piece{piece_type, color});
     }
     return material;
 }
@@ -52,7 +52,7 @@ auto Evaluator::evaluate_pieces_on_squares(const chesscore::Position &position, 
     chesscore::Square square{chesscore::Square::A1};
     for (int i = 0; i < chesscore::Square::count; ++i) {
         const auto piece = position.board().get_piece(square);
-        if (piece.has_value() && piece->color == color) {
+        if (piece.has_value() && piece->color() == color) {
             score += m_config.piece_on_square_value(piece.value(), square);
         }
         square += 1;
@@ -62,14 +62,14 @@ auto Evaluator::evaluate_pieces_on_squares(const chesscore::Position &position, 
 
 auto Evaluator::get_capture_score(const chesscore::Move &move) const -> Score {
     if (move.is_capture()) {
-        return m_config.piece_value(move.captured.value().type);
+        return m_config.piece_value(move.captured.value().type());
     }
     return Score{0};
 }
 
 auto Evaluator::get_promotion_score(const chesscore::Move &move) const -> Score {
     if (move.is_pawn_promotion()) {
-        return m_config.pawn_promotion_score + m_config.piece_value(move.promoted.value().type) - m_config.piece_value(chesscore::PieceType::Pawn);
+        return m_config.pawn_promotion_score + m_config.piece_value(move.promoted.value().type()) - m_config.piece_value(chesscore::PieceType::Pawn);
     }
     return Score{0};
 }
